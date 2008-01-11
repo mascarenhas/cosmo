@@ -1,7 +1,7 @@
 local require = require
 
 local lpeg = require "lpeg"
-local re = require "luma.re"
+local re = require "template.re"
 
 local loadstring = loadstring
 
