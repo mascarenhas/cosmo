@@ -5,7 +5,7 @@ local _G = _G
 local print, error = print, error
 local mt = getmetatable(m.P(0))
 
-module "luma.re"
+module "template.re"
 
 local I = m.P(function (s,i) print(i, s:sub(1, i-1)); return i end)
 
