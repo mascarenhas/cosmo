@@ -17,7 +17,7 @@ install: $(config_file)
 
 install-rocks: install
 	mkdir -p $(PREFIX)/samples
-	cp samples/*.lua $(PREFIX)/samples
+	cp -r samples/* $(PREFIX)/samples
 	mkdir -p $(PREFIX)/doc
 	cp -r doc/* $(PREFIX)/doc
 	mkdir -p $(PREFIX)/tests
@@ -26,5 +26,9 @@ install-rocks: install
 
 test:
 	cd tests && lua test.lua
+
+dist:
+	darcs dist -d template-0.1
+	mv template-0.1.tar.gz ..
 
 clean:
