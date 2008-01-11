@@ -58,7 +58,7 @@ local syntax = [[
   literal <- args / string / number / 'true' / 'false' / 'nil'
 ]]
 
-local recursive_match = false
+local recursive_match 
 
 local defs = {
   alpha = alpha,
@@ -68,7 +68,7 @@ local defs = {
   longstring = longstring,
   ['_'] = space,
   compile_text = function (s)
-		   return "table.insert(out, " .. string.format("%q", s) .. ")"
+		   return "insert(out, " .. string.format("%q", s) .. ")"
 		 end,
   compile_application = function (selector, args, subt)
 			  local cs = parse_selector(selector)
@@ -77,12 +77,12 @@ local defs = {
 			  if subt == "" then
 			    if args ~= "" then
 			      table.insert(ca, "selector = selector(" .. args .. ", false)")
- 			      table.insert(ca, "table.insert(out, tostring(selector))")
+ 			      table.insert(ca, "insert(out, tostring(selector))")
 			    else
 			      table.insert(ca, "if type(selector) == 'function' then")
-			      table.insert(ca, "  table.insert(out, tostring(selector()))")
+			      table.insert(ca, "  insert(out, tostring(selector()))")
 			      table.insert(ca, "else")
-			      table.insert(ca, "  table.insert(out, tostring(selector))")
+			      table.insert(ca, "  insert(out, tostring(selector))")
 			      table.insert(ca, "end")
                             end
 			  else
@@ -93,7 +93,7 @@ local defs = {
 			      if recursive_match then
 			        table.insert(ca, "  setmetatable(e, { __index = env })")
 			      end
-			      table.insert(ca, "  table.insert(out, subt(e))")
+			      table.insert(ca, "  insert(out, subt(e))")
 			      table.insert(ca, "end")
 			    else
 			      table.insert(ca, "if type(selector) == 'table' then")
@@ -101,14 +101,14 @@ local defs = {
 			      if recursive_match then
 			        table.insert(ca, "  setmetatable(e, { __index = env })")
 			      end
-			      table.insert(ca, "    table.insert(out, subt(e))")
+			      table.insert(ca, "    insert(out, subt(e))")
 			      table.insert(ca, "  end")
 			      table.insert(ca, "else")
 			      table.insert(ca, "  for e in coroutine.wrap(selector) do")
 			      if recursive_match then
 			        table.insert(ca, "  setmetatable(e, { __index = env })")
 			      end
-			      table.insert(ca, "    table.insert(out, subt(e))")
+			      table.insert(ca, "    insert(out, subt(e))")
 			      table.insert(ca, "  end")
 			      table.insert(ca, "end")
 			    end
@@ -119,10 +119,12 @@ local defs = {
 		       table.insert(ct, 1, [[
 			   local table, ipairs, type, cosmo, error, tostring = ...
 			   return function (env)
+                                    local concat = table.concat
+	                            local insert = table.insert
 				    local out = {}
 				]])
 		       table.insert(ct, [[
-					  return table.concat(out)
+					  return concat(out)
 				      end
 				    ]])
 		       local template_code = table.concat(ct, "\n")
@@ -137,20 +139,21 @@ local defs = {
 
 local compiler = re.compile(syntax, defs)
 
-function compile(template, recursive)
-  recursive_match = recursive
-  return compiler:match(template)
-end
-
 local compiled_templates = {}
 
-function fill(template, env)
+function compile(template, recursive)
   local ct = compiled_templates[template]
-  if not ct then 
-    ct = compile(template)
+  if not ct or ct.recursive ~= recursive then
+    recursive_match = recursive
+    ct = { template = compiler:match(template), recursive = recursive }
     compiled_templates[template] = ct
   end
-  return ct(env)
+  recursive_match = nil
+  return ct.template
+end
+
+function fill(template, env, recursive)
+  return compile(template, recursive)(env)
 end
 
 function cond(b, t)
