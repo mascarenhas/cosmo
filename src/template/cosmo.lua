@@ -59,6 +59,7 @@ local syntax = [[
 ]]
 
 local recursive_match 
+local template_orig
 
 local defs = {
   alpha = alpha,
@@ -130,7 +131,7 @@ local defs = {
 				      end
 				    ]])
 		       local template_code = table.concat(ct, "\n")
-		       local template_func, err = loadstring(template_code)
+		       local template_func, err = loadstring(template_code, template_orig)
 		       if not template_func then
 			 error("syntax error when compiling template: " .. err)
 		       else
@@ -147,6 +148,7 @@ function compile(template, recursive)
   local ct = compiled_templates[template]
   if not ct or ct.recursive ~= recursive then
     recursive_match = recursive
+    template_orig = template
     ct = { template = compiler:match(template), recursive = recursive }
     compiled_templates[template] = ct
   end
