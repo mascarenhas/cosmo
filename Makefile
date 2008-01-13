@@ -31,4 +31,8 @@ dist:
 	darcs dist -d template-0.1
 	mv template-0.1.tar.gz ..
 
+gen_dist:
+	darcs push 139.82.100.4:public_html/template/current
+	ssh 139.82.100.4 "cd public_html/template/current && make dist"
+
 clean:
