@@ -76,8 +76,10 @@ local defs = {
 			  table.insert(ca, "if not selector then selector = '' end")
 			  if subt == "" then
 			    if args ~= "" then
-			      table.insert(ca, "selector = selector(" .. args .. ", false)")
- 			      table.insert(ca, "insert(out, tostring(selector))")
+			      table.insert(ca, "if type(selector) == 'function' then")
+			      table.insert(ca, "  selector = selector(" .. args .. ", false)")
+			      table.insert(ca, "end")
+			      table.insert(ca, "insert(out, tostring(selector))")
 			    else
 			      table.insert(ca, "if type(selector) == 'function' then")
 			      table.insert(ca, "  insert(out, tostring(selector()))")
@@ -104,7 +106,7 @@ local defs = {
 			      table.insert(ca, "    insert(out, subt(e))")
 			      table.insert(ca, "  end")
 			      table.insert(ca, "else")
-			      table.insert(ca, "  for e in coroutine.wrap(selector) do")
+			      table.insert(ca, "  for e in coroutine.wrap(selector), nil, true do")
 			      if recursive_match then
 			        table.insert(ca, "  setmetatable(e, { __index = env })")
 			      end
