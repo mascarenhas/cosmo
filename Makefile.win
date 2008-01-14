@@ -8,7 +8,7 @@ install:
 install-rocks: install
 	mkdir "$(PREFIX)\samples"
 	mkdir "$(PREFIX)\doc"
-	mkdir "$(PREFIX)\test"
+	mkdir "$(PREFIX)\tests"
 	xcopy /E samples "$(PREFIX)\samples\"
 	xcopy /E doc "$(PREFIX)\doc\"
 	xcopy /E tests "$(PREFIX)\tests\"
