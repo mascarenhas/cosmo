@@ -1,0 +1,14 @@
+# $Id: Makefile,v 1.1.1.1 2007/11/26 17:12:24 mascarenhas Exp $
+
+install:
+	IF NOT EXIST "$(LUA_DIR)/template" mkdir "$(LUA_DIR)/template"
+	copy src\template\cosmo.lua "$(LUA_DIR)\template"
+	copy src\template\re.lua "$(LUA_DIR)\template"
+
+install-rocks: install
+	mkdir "$(PREFIX)\samples"
+	mkdir "$(PREFIX)\doc"
+	mkdir "$(PREFIX)\test"
+	xcopy /E samples "$(PREFIX)\samples\"
+	xcopy /E doc "$(PREFIX)\doc\"
+	xcopy /E tests "$(PREFIX)\tests\"
