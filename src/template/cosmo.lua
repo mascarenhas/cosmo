@@ -125,6 +125,7 @@ local defs = {
                                     local concat = table.concat
 	                            local insert = table.insert
 				    local out = {}
+				    if type(env) == "string" then env = { it = env } end
 				]])
 		       table.insert(ct, [[
 					  return concat(out)
