@@ -14,6 +14,7 @@ install: $(config_file)
 	mkdir -p $(LUA_DIR)/template
 	cp src/template/cosmo.lua $(LUA_DIR)/template
 	cp src/template/re.lua $(LUA_DIR)/template
+	cp src/template/lp.lua $(LUA_DIR)/template
 
 install-rocks: install
 	mkdir -p $(PREFIX)/samples

@@ -143,18 +143,45 @@ local defs = {
 
 local compiler = re.compile(syntax, defs)
 
-local compiled_templates = {}
+local cache_meta =  { __index = function (tab, key)
+				   local new = {}
+				   tab[key] = new
+				   return new
+				end }
 
-function compile(template, recursive)
-  local ct = compiled_templates[template]
-  if not ct or ct.recursive ~= recursive then
+local compiled_templates = {}
+setmetatable(compiled_templates, cache_meta)
+
+local compiled_recursive = {}
+setmetatable(compiled_recursive, cache_meta)
+
+
+
+function compile(template, chunkname, recursive)
+  if type(chunkname) == "boolean" then
+     recursive = chunkname
+     chunkname = nil
+  end
+  chunkname = chunkname or template
+  local ct
+  if recursive then
+     ct = compiled_recursive[template][chunkname]
+  else
+     ct = compiled_templates[template][chunkname]
+  end
+  if not ct then
     recursive_match = recursive
-    template_orig = template
-    ct = { template = compiler:match(template), recursive = recursive }
-    compiled_templates[template] = ct
+    template_orig = chunkname
+    ct = compiler:match(template)
+    if recursive then
+       compiled_recursive[template][chunkname] = ct
+    else
+       compiled_templates[template][chunkname] = ct
+    end
   end
   recursive_match = nil
-  return ct.template
+  template_orig = nil
+  return ct
 end
 
 function fill(template, env, recursive)
