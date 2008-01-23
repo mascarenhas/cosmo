@@ -193,3 +193,16 @@ function c(bool)
 end
 
 yield = coroutine.yield
+
+function freeze(template)
+   return string.dump(template)
+end
+
+function thaw(frozen_template)
+   local template_func = loadstring(frozen_template)
+   setfenv(template_func, { table = table, ipairs = ipairs,
+	      type = type, cosmo = _M, error = error, 
+	      tostring = tostring, setmetatable = setmetatable,
+	      coroutine = coroutine, rawget = rawget, print = print })
+   return template_func
+end
