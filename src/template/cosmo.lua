@@ -8,7 +8,7 @@ module(..., package.seeall)
 local function parse_selector(selector)
   selector = string.sub(selector, 2, #selector)
   local parts = {}
-  for w in string.gmatch(selector, "[^%.]+") do
+  for w in string.gmatch(selector, "[^/]+") do
     local n = tonumber(w)
     if n then
       table.insert(parts, "[" .. n .. "]")
@@ -17,6 +17,20 @@ local function parse_selector(selector)
     end
   end
   return "env" .. table.concat(parts)
+end
+
+local function get_selector(env, selector)
+  selector = string.sub(selector, 2, #selector)
+  local parts = {}
+  for w in string.gmatch(selector, "[^/]+") do
+    local n = tonumber(w)
+    if n then
+       env = env[n]
+    else
+       env = env[w]
+    end
+  end
+  return env
 end
 
 local function gen_substitution_no_args()
@@ -75,7 +89,7 @@ local function compile_template_application(selector, args, first_subtemplate,
    if first_subtemplate ~= "" then table.insert(subtemplates, 1, first_subtemplate) end
    local cs = parse_selector(selector)
    local ca = { "local selector = " .. cs }
-   table.insert(ca, "if not selector then selector = '$" .. selector .. "' end")
+   table.insert(ca, "if not selector then selector = '" .. selector .. "' end")
    if #subtemplates == 0 then
       if args ~= "" then
 	 table.insert(ca, gen_substitution_with_args(args))
@@ -143,6 +157,8 @@ local cache_scoped = {}
 setmetatable(cache_scoped, cache_metatable)
 
 function compile(template, chunkname, non_scoped)
+  local start = template:match("^(%[=*%[)")
+  if start then template = template:sub(#start + 1, #template - #start) end
   if type(chunkname) == "boolean" then
      non_scoped, chunkname = chunkname, non_scoped
   end
@@ -166,8 +182,74 @@ function compile(template, chunkname, non_scoped)
   return compiled_template
 end
 
+local filled_templates = {}
+
+local insert = table.insert
+local concat = table.concat
+
+local function fill_text(state, text)
+   insert(state.out, text)
+end
+
+local function fill_template_application(state, selector, args, first_subtemplate, 
+					 subtemplates)
+   local env, out = state.env, state.out
+   subtemplates = subtemplates or {}
+   if first_subtemplate ~= "" then table.insert(subtemplates, 1, first_subtemplate) end
+   selector = get_selector(env, selector) or selector
+   if #subtemplates == 0 then
+      if args ~= "" then
+	 if type(selector) == 'function' then
+	    selector = selector(dostring("return " .. args), false)
+	 end
+	 insert(out, tostring(selector))
+      else
+	 if type(selector) == 'function' then
+	    insert(out, tostring(selector()))
+	 else
+	    insert(out, tostring(selector))
+	 end
+      end
+   else
+      if args ~= "" then
+	 args = dostring("return " .. args)
+	 for e in coroutine.wrap(selector), args, true do
+	    setmetatable(e, { __index = env })
+	    insert(out, fill(subtemplates[rawget(e, '_template') or 1], e))
+	 end
+      else
+	 if type(selector) == 'table' then
+	    for _, e in ipairs(selector) do
+	       setmetatable(e, { __index = env })
+	       insert(out, fill(subtemplates[rawget(e, '_template') or 1], e))
+	    end
+	 else
+	    for e in coroutine.wrap(selector), nil, true do
+	       setmetatable(e, { __index = env })
+	       insert(out, fill(subtemplates[rawget(e, '_template') or 1], e))
+	    end
+	 end
+      end
+   end
+end
+
+local function fill_template(state, compiled_parts)
+   return concat(state.out)
+end
+
+local interpreter = grammar.cosmo_compiler{ text = fill_text,
+   template_application = fill_template_application, 
+   template = fill_template }
+
 function fill(template, env)
-  return compile(template)(env)
+   local start = template:match("^(%[=*%[)")
+   if start then template = template:sub(#start + 1, #template - #start) end
+   if filled_templates[template] then return compile(template)(env) end
+   filled_templates[template] = true
+   local out = {}
+  
+   if type(env) == "string" then env = { it = env } end
+   return interpreter:match(template, 1, { env = env, out = out })
 end
 
 local nop = function () end
