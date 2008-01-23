@@ -5,20 +5,6 @@ local loadstring = loadstring
 
 module(..., package.seeall)
 
-local function parse_selector(selector)
-  selector = string.sub(selector, 2, #selector)
-  local parts = {}
-  for w in string.gmatch(selector, "[^/]+") do
-    local n = tonumber(w)
-    if n then
-      table.insert(parts, "[" .. n .. "]")
-    else
-      table.insert(parts, "['" .. w .. "']")
-    end
-  end
-  return "env" .. table.concat(parts)
-end
-
 local function get_selector(env, selector)
   selector = string.sub(selector, 2, #selector)
   local parts = {}
@@ -87,7 +73,7 @@ local function compile_template_application(selector, args, first_subtemplate,
 					    subtemplates)
    subtemplates = subtemplates or {}
    if first_subtemplate ~= "" then table.insert(subtemplates, 1, first_subtemplate) end
-   local cs = parse_selector(selector)
+   local cs = grammar.parse_selector(selector)
    local ca = { "local selector = " .. cs }
    table.insert(ca, "if not selector then selector = '" .. selector .. "' end")
    if #subtemplates == 0 then
@@ -200,7 +186,7 @@ local function fill_template_application(state, selector, args, first_subtemplat
    if #subtemplates == 0 then
       if args ~= "" then
 	 if type(selector) == 'function' then
-	    selector = selector(dostring("return " .. args), false)
+	    selector = selector(loadstring("local env = (...); return " .. args)(env), false)
 	 end
 	 insert(out, tostring(selector))
       else
@@ -212,7 +198,7 @@ local function fill_template_application(state, selector, args, first_subtemplat
       end
    else
       if args ~= "" then
-	 args = dostring("return " .. args)
+	 args = loadstring("local env = (...); return " .. args)(env)
 	 for e in coroutine.wrap(selector), args, true do
 	    setmetatable(e, { __index = env })
 	    insert(out, fill(subtemplates[rawget(e, '_template') or 1], e))
