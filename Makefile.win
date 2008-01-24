@@ -1,11 +1,28 @@
 # $Id: Makefile,v 1.1.1.1 2007/11/26 17:12:24 mascarenhas Exp $
 
+LUA_INCLUDE= c:\lua5.1\include
+LUA_LIB= c:\lua5.1\lua5.1.lib
+
+LUA_DIR= c:\lua5.1\lua
+LUA_LIBDIR= c:\lua5.1
+
+.c.obj:
+	$(CC) /c /MD /Fo$@ $(CFLAGS) /I$(LUA_INCLUDE) $<
+
+all: src\template\lpeg.dll
+
+src\template\lpeg.dll: src\template\lpeg.obj
+	link /dll /out:src\template\lpeg.dll /def:src\template\lpeg.def $(LIB_OPTION) src\template\lpeg.obj
+	mt -manifest src\template\lpeg.dll.manifest -outputresource:src\template\lpeg.dll;2
+
 install:
 	IF NOT EXIST "$(LUA_DIR)\template" mkdir "$(LUA_DIR)\template"
+	IF NOT EXIST "$(LUA_LIBDIR)\template" mkdir "$(LUA_LIBDIR)\template"
 	copy src\template\cosmo.lua "$(LUA_DIR)\template"
 	copy src\template\cosmo_grammar.lua "$(LUA_DIR)\template"
 	copy src\template\re.lua "$(LUA_DIR)\template"
 	copy src\template\lp.lua "$(LUA_DIR)\template"
+	copy src\template\lpeg.dll "$(LUA_LIBDIR)\template"
 
 install-rocks: install
 	mkdir "$(PREFIX)\samples"

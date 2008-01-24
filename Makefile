@@ -9,6 +9,11 @@ endif
 $(config_file):
 	chmod +x configure
 
+all: src/template/lpeg.so
+
+src/template/lpeg.so: src/template/lpeg.o
+	export MACOSX_DEPLOYMENT_TARGET="10.3"; $(CC) $(CFLAGS) $(LIB_OPTION) -o src/template/lpeg.so src/template/lpeg.o
+
 install: $(config_file)
 	mkdir -p $(LUA_DIR)
 	mkdir -p $(LUA_DIR)/template
@@ -16,6 +21,8 @@ install: $(config_file)
 	cp src/template/cosmo_grammar.lua $(LUA_DIR)/template
 	cp src/template/re.lua $(LUA_DIR)/template
 	cp src/template/lp.lua $(LUA_DIR)/template
+	mkdir -p $(LUA_LIBDIR)/template
+	cp src/template/lpeg.so $(LUA_LIBDIR)/template
 
 install-rocks: install
 	mkdir -p $(PREFIX)/samples
@@ -27,7 +34,7 @@ install-rocks: install
 	echo "Go to $(PREFIX) for samples and docs!"
 
 test:
-	cd tests && lua test.lua
+	cd tests && lua -l luarocks.require test_cosmo_yuri.lua
 
 dist:
 	darcs dist -d template-0.1
