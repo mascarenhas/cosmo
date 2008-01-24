@@ -19,6 +19,7 @@ install: $(config_file)
 	mkdir -p $(LUA_DIR)/template
 	cp src/template/cosmo.lua $(LUA_DIR)/template
 	cp src/template/cosmo_grammar.lua $(LUA_DIR)/template
+	cp src/template/cosmo_fill.lua $(LUA_DIR)/template
 	cp src/template/re.lua $(LUA_DIR)/template
 	cp src/template/lp.lua $(LUA_DIR)/template
 	mkdir -p $(LUA_LIBDIR)/template

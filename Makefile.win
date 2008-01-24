@@ -20,6 +20,7 @@ install:
 	IF NOT EXIST "$(LUA_LIBDIR)\template" mkdir "$(LUA_LIBDIR)\template"
 	copy src\template\cosmo.lua "$(LUA_DIR)\template"
 	copy src\template\cosmo_grammar.lua "$(LUA_DIR)\template"
+	copy src\template\cosmo_fill.lua "$(LUA_DIR)\template"
 	copy src\template\re.lua "$(LUA_DIR)\template"
 	copy src\template\lp.lua "$(LUA_DIR)\template"
 	copy src\template\lpeg.dll "$(LUA_LIBDIR)\template"
