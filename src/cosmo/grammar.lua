@@ -8,7 +8,7 @@ function parse_selector(selector, env)
   env = env or "env"
   selector = string.sub(selector, 2, #selector)
   local parts = {}
-  for w in string.gmatch(selector, "[^/]+") do
+  for w in string.gmatch(selector, "[^|]+") do
     local n = tonumber(w)
     if n then
       table.insert(parts, "[" .. n .. "]")
@@ -49,7 +49,7 @@ local syntax = [[
   template <- (item* -> {} !.) -> compile_template
   item <- text / templateappl
   text <- {~ (!selector ('$$' -> '$' / .))+ ~} -> compile_text
-  selector <- '$' alphanum+ ('/' alphanum+)*
+  selector <- '$' alphanum+ ('|' alphanum+)*
   templateappl <- ({selector} {~args?~} {longstring?} (_ ','_ {longstring})* -> {}) -> compile_application
   args <- '{' _ '}' / '{' _ arg _ (',' _ arg _)* ','? _ '}'
   arg <- attr / literal

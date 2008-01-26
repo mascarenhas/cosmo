@@ -6,7 +6,7 @@ module(..., package.seeall)
 local function get_selector(env, selector)
   selector = string.sub(selector, 2, #selector)
   local parts = {}
-  for w in string.gmatch(selector, "[^/]+") do
+  for w in string.gmatch(selector, "[^|]+") do
     local n = tonumber(w)
     if n then
        env = env[n]
