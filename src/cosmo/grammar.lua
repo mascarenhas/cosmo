@@ -1,6 +1,6 @@
 
-local lpeg = require "template.lpeg"
-local re = require "template.re"
+local lpeg = require "cosmo.lpeg"
+local re = require "cosmo.re"
 
 module(..., package.seeall)
 

@@ -1,7 +1,7 @@
 local require = require
 
-local grammar = require "template.cosmo_grammar"
-local interpreter = require "template.cosmo_fill"
+local grammar = require "cosmo.grammar"
+local interpreter = require "cosmo.fill"
 local loadstring = loadstring
 
 module(..., package.seeall)

@@ -1,24 +1,22 @@
-package = "Template"
+package = "Cosmo"
 
-version = "0.1-1"
+version = "current-1"
 
 description = {
-  summary = "Lpeg-based text templates",
+  summary = "Safe templates for Lua",
   detailed = [[
-     Template.* are Lpeg-based text template systems for Lua. They can be
-     used to generate any kind of text such as HTML, XML, or even Lua
-     code. Currently there are two systems, template.cosmo which is
-     a reimplementation of Cosmo templates using Lpeg, and template.lp
-     which is a reimplementation of CGILua's Lua Pages.
+Cosmo is a "safe templates" engine. It allows you to fill nested templates, 
+providing many of the advantages of Turing-complete template engines, 
+without without the downside of allowing arbitrary code in the templates.
   ]],
   license = "MIT/X11",
-  homepage = "http://www.lua.inf.puc-rio.br/~mascarenhas/template"
+  homepage = "http://cosmo.luaforge.net"
 }
 
 dependencies = { }
 
 source = {
-  url = "http://www.lua.inf.puc-rio.br/~mascarenhas/template/template-0.1.tar.gz"
+  url = "http://www.lua.inf.puc-rio.br/~mascarenhas/cosmo/cosmo-current.tar.gz"
 }
 
 build = {

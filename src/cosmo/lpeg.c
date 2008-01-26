@@ -1983,8 +1983,8 @@ static struct luaL_reg metapattreg[] = {
 };
 
 
-int luaopen_template_lpeg (lua_State *L);
-int luaopen_template_lpeg (lua_State *L) {
+int luaopen_cosmo_lpeg (lua_State *L);
+int luaopen_cosmo_lpeg (lua_State *L) {
   lua_newtable(L);
   lua_replace(L, LUA_ENVIRONINDEX);  /* empty env for new patterns */
   luaL_newmetatable(L, "pattern");

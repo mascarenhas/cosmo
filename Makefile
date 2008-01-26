@@ -9,21 +9,20 @@ endif
 $(config_file):
 	chmod +x configure
 
-all: src/template/lpeg.so
+all: src/cosmo/lpeg.so
 
-src/template/lpeg.so: src/template/lpeg.o
-	export MACOSX_DEPLOYMENT_TARGET="10.3"; $(CC) $(CFLAGS) $(LIB_OPTION) -o src/template/lpeg.so src/template/lpeg.o
+src/cosmo/lpeg.so: src/cosmo/lpeg.o
+	export MACOSX_DEPLOYMENT_TARGET="10.3"; $(CC) $(CFLAGS) $(LIB_OPTION) -o src/cosmo/lpeg.so src/cosmo/lpeg.o
 
 install: $(config_file)
 	mkdir -p $(LUA_DIR)
-	mkdir -p $(LUA_DIR)/template
-	cp src/template/cosmo.lua $(LUA_DIR)/template
-	cp src/template/cosmo_grammar.lua $(LUA_DIR)/template
-	cp src/template/cosmo_fill.lua $(LUA_DIR)/template
-	cp src/template/re.lua $(LUA_DIR)/template
-	cp src/template/lp.lua $(LUA_DIR)/template
-	mkdir -p $(LUA_LIBDIR)/template
-	cp src/template/lpeg.so $(LUA_LIBDIR)/template
+	mkdir -p $(LUA_DIR)/cosmo
+	cp src/cosmo.lua $(LUA_DIR)/
+	cp src/cosmo/grammar.lua $(LUA_DIR)/cosmo
+	cp src/cosmo/fill.lua $(LUA_DIR)/cosmo
+	cp src/cosmo/re.lua $(LUA_DIR)/cosmo
+	mkdir -p $(LUA_LIBDIR)/cosmo
+	cp src/cosmo/lpeg.so $(LUA_LIBDIR)/cosmo
 
 install-rocks: install
 	mkdir -p $(PREFIX)/samples
@@ -35,14 +34,15 @@ install-rocks: install
 	echo "Go to $(PREFIX) for samples and docs!"
 
 test:
-	cd tests && lua -l luarocks.require test_cosmo_yuri.lua
+	cd tests && lua -l luarocks.require test_cosmo.lua
 
 dist:
-	darcs dist -d template-0.1
-	mv template-0.1.tar.gz ..
+	darcs dist -d cosmo-current
+	mv cosmo-current.tar.gz ..
 
 gen_dist:
-	darcs push 139.82.100.4:public_html/template/current
-	ssh 139.82.100.4 "cd public_html/template/current && make dist"
+	darcs push 139.82.100.4:public_html/cosmo/current
+	ssh 139.82.100.4 "cd public_html/cosmo/current && make dist"
 
 clean:
+	rm src/cosmo/lpeg.o src/cosmo/lpeg.so

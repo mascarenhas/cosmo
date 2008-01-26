@@ -1,5 +1,5 @@
 
-local grammar = require "template.cosmo_grammar"
+local grammar = require "cosmo.grammar"
 
 module(..., package.seeall)
 
