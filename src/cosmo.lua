@@ -179,3 +179,7 @@ function map(arg, has_block)
       return table.concat(arg)
    end
 end
+
+function inject(arg)
+   cosmo.yield(arg)
+end
