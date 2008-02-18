@@ -152,3 +152,148 @@ result = cosmo.f(template){
           end
         }
 assert(result=="John: 4 cards \nJoão: 1 card (needs 2 more)\n")
+
+template = " $foo|bar $foo|1|baz "
+result = cosmo.fill(template, { foo = { { baz = "World!" }, bar = "Hello" } })
+assert(result==" Hello World! ")
+
+template = " Hello $message{ 'World!' } "
+result = cosmo.fill(template, { message = function (arg) return arg[1] end })
+assert(result==" Hello World! ")
+
+template = " Hello $message{ $msg } "
+result = cosmo.fill(template, { msg = "World!", message = function (arg) return arg[1] end })
+assert(result==" Hello World! ")
+
+template = " Hello $message{ $msg }[[$it]] "
+result = cosmo.fill(template, { msg = "World!", 
+		       message = function (arg) cosmo.yield{ it = arg[1] } end })
+assert(result==" Hello World! ")
+
+template = " $foo|bar $foo|1|baz "
+result = cosmo.f(template){ foo = { { baz = "World!" }, bar = "Hello" } }
+assert(result==" Hello World! ")
+
+template = " Hello $message{ 'World!' } "
+result = cosmo.f(template){ message = function (arg) return arg[1] end }
+assert(result==" Hello World! ")
+
+template = " Hello $message{ $msg } "
+result = cosmo.f(template){ msg = "World!", message = function (arg) return arg[1] end }
+assert(result==" Hello World! ")
+
+template = " Hello $message{ $msg }[[$it]] "
+result = cosmo.f(template){ msg = "World!", 
+		       message = function (arg) cosmo.yield{ it = arg[1] } end }
+assert(result==" Hello World! ")
+
+
+template = " Hello $message{ $msg } "
+result = cosmo.f(template){ msg = "World!", 
+   message = function (arg, has_block) 
+		if has_block then
+		   cosmo.yield{ it = arg[1] }
+		else
+		   return arg[1] 
+		end
+	     end }
+assert(result==" Hello World! ")
+
+template = " Hello $message{ $msg }[[$it]] "
+result = cosmo.f(template){ msg = "World!", 
+   message = function (arg, has_block) 
+		if has_block then
+		   cosmo.yield{ it = arg[1] }
+		else
+		   return arg[1] 
+		end
+	     end }
+assert(result==" Hello World! ")
+
+template = " Hello $message{ $msg } "
+result = cosmo.fill(template, { msg = "World!", 
+   message = function (arg, has_block) 
+		if has_block then
+		   cosmo.yield{ it = arg[1] }
+		else
+		   return arg[1] 
+		end
+	     end })
+assert(result==" Hello World! ")
+
+template = " Hello $message{ $msg }[[$it]] "
+result = cosmo.fill(template, { msg = "World!", 
+   message = function (arg, has_block) 
+		if has_block then
+		   cosmo.yield{ it = arg[1] }
+		else
+		   return arg[1] 
+		end
+	     end })
+assert(result==" Hello World! ")
+
+template = " $message{ greeting = 'Hello', target = 'World' } "
+result = cosmo.fill(template, { message = function(arg, has_block)
+					     if has_block then
+						cosmo.yield{ grt = arg.greeting, tgt = arg.target }
+					     else
+						return arg.greeting .. " " .. arg.target .. "!"
+					     end
+					  end })
+assert(result==" Hello World! ")
+
+template = " $message{ greeting = 'Hello', target = 'World' } "
+result = cosmo.f(template){ message = function(arg, has_block)
+					     if has_block then
+						cosmo.yield{ grt = arg.greeting, tgt = arg.target }
+					     else
+						return arg.greeting .. " " .. arg.target .. "!"
+					     end
+					  end }
+assert(result==" Hello World! ")
+
+template = " $message{ greeting = 'Hello', target = 'World' }[[$grt $tgt]] "
+result = cosmo.fill(template, { message = function(arg, has_block)
+					     if has_block then
+						cosmo.yield{ grt = arg.greeting, tgt = arg.target }
+					     else
+						return arg.greeting .. " " .. arg.target .. "!"
+					     end
+					  end })
+assert(result==" Hello World ")
+
+template = " $message{ greeting = 'Hello', target = 'World'}[[$grt $tgt]] "
+result = cosmo.f(template){ message = function(arg, has_block)
+					     if has_block then
+						cosmo.yield{ grt = arg.greeting, tgt = arg.target }
+					     else
+						return arg.greeting .. " " .. arg.target .. "!"
+					     end
+					  end }
+assert(result==" Hello World ")
+
+local env = {}
+setmetatable(env, { __index = { text = "Hello World!" } })
+template = " $show[[$text]] "
+result = cosmo.fill(template, { show = function () cosmo.yield(env) end })
+assert(result == " Hello World! ")
+result = cosmo.f(template){ show = function () cosmo.yield(env) end }
+assert(result == " Hello World! ")
+
+template = " $map{ 1, 2, 3, 4, 5}[[$it]] "
+result = cosmo.fill(template, { map = cosmo.map })
+assert(result == " 12345 ")
+result = cosmo.f(template){ map = cosmo.map }
+assert(result == " 12345 ")
+
+template = " $map{ 1, 2, 3, 4, 5} "
+result = cosmo.fill(template, { map = cosmo.map })
+assert(result == " 12345 ")
+result = cosmo.f(template){ map = cosmo.map }
+assert(result == " 12345 ")
+
+template = "$inject{ msg = 'Hello', target = 'World' }[[ $msg $target! ]]"
+result = cosmo.fill(template, { inject = cosmo.inject })
+assert(result == " Hello World! ")
+result = cosmo.f(template){ inject = cosmo.inject }
+assert(result == " Hello World! ")
