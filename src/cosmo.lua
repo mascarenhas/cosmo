@@ -170,5 +170,12 @@ function c(bool)
    end
 end
 
-
-
+function map(arg, has_block)
+   if has_block then
+      for _, item in ipairs(arg) do
+	 cosmo.yield{ it = tostring(item) }
+      end
+   else
+      return table.concat(arg)
+   end
+end
