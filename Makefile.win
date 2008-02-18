@@ -13,7 +13,7 @@ all: src\cosmo\lpeg.dll
 
 src\cosmo\lpeg.dll: src\cosmo\lpeg.obj
 	link /dll /out:src\cosmo\lpeg.dll /def:src\cosmo\lpeg.def $(LIB_OPTION) src\cosmo\lpeg.obj
-	mt -manifest src\cosmo\lpeg.dll.manifest -outputresource:src\cosmo\lpeg.dll;2
+	IF EXIST src\cosmo\lpeg.dll.manifest mt -manifest src\cosmo\lpeg.dll.manifest -outputresource:src\cosmo\lpeg.dll;2
 
 install:
 	IF NOT EXIST "$(LUA_DIR)\cosmo" mkdir "$(LUA_DIR)\cosmo"

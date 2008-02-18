@@ -31,6 +31,9 @@ local compiled_template = [[
 			    ]===]
 			    $if_args[===[
 				  for e in coroutine.wrap(selector), $args, true do
+				     if type(e) ~= "table" then
+					e = { it = tostring(e) }
+				     end
 				     if not getmetatable(e) then  setmetatable(e, { __index = env }) end
 				     insert(out, subtemplates[rawget(e, '_template') or 1](e))
 				  end
@@ -38,11 +41,17 @@ local compiled_template = [[
 			    [===[
 				  if type(selector) == 'table' then
 				     for _, e in ipairs(selector) do
+					if type(e) ~= "table" then
+					   e = { it = tostring(e) }
+					end
 					if not getmetatable(e) then setmetatable(e, { __index = env }) end
 					insert(out, subtemplates[rawget(e, '_template') or 1](e))
 				     end
 				  else
 				     for e in coroutine.wrap(selector), nil, true do
+					if type(e) ~= "table" then
+					   e = { it = tostring(e) }
+					end
 					if not getmetatable(e) then setmetatable(e, { __index = env }) end
 					insert(out, subtemplates[rawget(e, '_template') or 1](e))
 				     end
@@ -173,7 +182,7 @@ end
 function map(arg, has_block)
    if has_block then
       for _, item in ipairs(arg) do
-	 cosmo.yield{ it = tostring(item) }
+	 cosmo.yield(item)
       end
    else
       return table.concat(arg)
