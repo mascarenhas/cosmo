@@ -48,18 +48,18 @@ local function fill_template_application(state, selector, args, first_subtemplat
       if args and args ~= "" then
 	 args = loadstring("local env = (...); return " .. args)(env)
 	 for e in coroutine.wrap(selector), args, true do
-	    setmetatable(e, { __index = env })
+	    if not getmetatable(e) then setmetatable(e, { __index = env }) end
 	    insert(out, fill(subtemplates[rawget(e, '_template') or 1], e))
 	 end
       else
 	 if type(selector) == 'table' then
 	    for _, e in ipairs(selector) do
-	       setmetatable(e, { __index = env })
+	       if not getmetatable(e) then setmetatable(e, { __index = env }) end
 	       insert(out, fill(subtemplates[rawget(e, '_template') or 1], e, fill))
 	    end
 	 else
 	    for e in coroutine.wrap(selector), nil, true do
-	       setmetatable(e, { __index = env })
+	       if not getmetatable(e) then setmetatable(e, { __index = env }) end
 	       insert(out, fill(subtemplates[rawget(e, '_template') or 1], e, fill))
 	    end
 	 end

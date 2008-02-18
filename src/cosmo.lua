@@ -13,6 +13,7 @@ local compiled_template = [[
 		local concat = table.concat
 		local insert = table.insert
 		local compile = compile
+		local getmetatable = getmetatable
 		local setmetatable = setmetatable
 		local out = {}
 		if type(env) == "string" then env = { it = env } end
@@ -30,19 +31,19 @@ local compiled_template = [[
 			    ]===]
 			    $if_args[===[
 				  for e in coroutine.wrap(selector), $args, true do
-				     setmetatable(e, { __index = env })
+				     if not getmetatable(e) then  setmetatable(e, { __index = env }) end
 				     insert(out, subtemplates[rawget(e, '_template') or 1](e))
 				  end
 			    ]===],
 			    [===[
 				  if type(selector) == 'table' then
 				     for _, e in ipairs(selector) do
-					setmetatable(e, { __index = env })
+					if not getmetatable(e) then setmetatable(e, { __index = env }) end
 					insert(out, subtemplates[rawget(e, '_template') or 1](e))
 				     end
 				  else
 				     for e in coroutine.wrap(selector), nil, true do
-					setmetatable(e, { __index = env })
+					if not getmetatable(e) then setmetatable(e, { __index = env }) end
 					insert(out, subtemplates[rawget(e, '_template') or 1](e))
 				     end
 				  end
