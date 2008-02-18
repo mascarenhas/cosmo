@@ -37,12 +37,12 @@ test:
 	cd tests && lua -l luarocks.require test_cosmo.lua
 
 dist:
-	darcs dist -d cosmo-current
-	mv cosmo-current.tar.gz ..
+	darcs dist -d cosmo-$(VERSION)
+	mv cosmo-$(VERSION).tar.gz ..
 
 gen_dist:
 	darcs push 139.82.100.4:public_html/cosmo/current
-	ssh 139.82.100.4 "cd public_html/cosmo/current && make dist"
+	ssh 139.82.100.4 "cd public_html/cosmo/current && make dist VERSION=$(VERSION)"
 
 clean:
 	rm src/cosmo/lpeg.o src/cosmo/lpeg.so
