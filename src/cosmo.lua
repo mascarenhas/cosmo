@@ -135,7 +135,6 @@ setmetatable(cache, { __index = function (tab, key)
 		      __mode = "v" })
 
 function compile(template, chunkname)
-  template = template or ""
   chunkname = chunkname or template
   local compiled_template = cache[template][chunkname]
   if not compiled_template then
@@ -148,7 +147,6 @@ end
 local filled_templates = {}
 
 function fill(template, env)
-   template = template or ""
    local start = template:match("^(%[=*%[)")
    if start then template = template:sub(#start + 1, #template - #start) end
    if filled_templates[template] then 
