@@ -36,13 +36,16 @@ install-rocks: install
 test:
 	cd tests && lua -l luarocks.require test_cosmo.lua
 
-dist:
-	darcs dist -d cosmo-$(VERSION)
-	mv cosmo-$(VERSION).tar.gz ..
+upload-cvs:
+	darcs dist -d alien-current
+	ncftpput -u mascarenhas ftp.luaforge.net cosmo/htdocs cosmo-current.tar.gz
 
-gen_dist:
+upload-dist:
 	darcs push 139.82.100.4:public_html/cosmo/current
 	ssh 139.82.100.4 "cd public_html/cosmo/current && make dist VERSION=$(VERSION)"
+	darcs dist -d cosmo-$(VERSION)
+	ncftpput -u mascarenhas ftp.luaforge.net cosmo/htdocs cosmo-$(VERSION).tar.gz
+	ncftpput -u mascarenhas ftp.luaforge.net cosmo/htdocs doc/index.html
 
 clean:
 	rm src/cosmo/lpeg.o src/cosmo/lpeg.so
