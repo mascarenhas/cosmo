@@ -40,6 +40,9 @@ upload-cvs:
 	darcs dist -d alien-current
 	ncftpput -u mascarenhas ftp.luaforge.net cosmo/htdocs cosmo-current.tar.gz
 
+dist:
+	darcs dist -d cosmo-$(VERSION)
+
 upload-dist:
 	darcs push 139.82.100.4:public_html/cosmo/current
 	ssh 139.82.100.4 "cd public_html/cosmo/current && make dist VERSION=$(VERSION)"
