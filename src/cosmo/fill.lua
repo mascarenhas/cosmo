@@ -21,7 +21,7 @@ local insert = table.insert
 local concat = table.concat
 
 local function fill_text(state, text)
-   insert(state.out, text)
+  insert(state.out, text)
 end
 
 local function fill_template_application(state, selector, args, first_subtemplate, 

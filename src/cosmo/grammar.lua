@@ -1,6 +1,6 @@
 
-local lpeg = require "cosmo.lpeg"
-local re = require "cosmo.re"
+local lpeg = require "lpeg"
+local re = require "re"
 
 module(..., package.seeall)
 
@@ -46,16 +46,17 @@ local shortstring = (lpeg.P'"' * ( (lpeg.P'\\' * 1) + (1 - (lpeg.S'"\n\r\f')) )^
 local space = (lpeg.S'\n \t\r\f')^0
  
 local syntax = [[
-  template <- (item* -> {} !.) -> compile_template
-  item <- text / templateappl
-  text <- {~ (!selector ('$$' -> '$' / .))+ ~} -> compile_text
-  selector <- '$' alphanum+ ('|' alphanum+)*
-  templateappl <- ({selector} {~args?~} {longstring?} (_ ','_ {longstring})* -> {}) -> compile_application
-  args <- '{' _ '}' / '{' _ arg _ (',' _ arg _)* ','? _ '}'
-  arg <- attr / literal
-  attr <- symbol _ '=' _ literal / '[' _ literal _ ']' _ '=' _ literal
-  symbol <- alpha alphanum*
-  literal <- args / string / number / 'true' / 'false' / 'nil' / {selector} -> parse_selector
+  template <- (%state <item>* -> {} !.) -> compiletemplate
+  item <- <text> / <templateappl>
+  text <- (%state {~ (!<selector> ('$$' -> '$' / .))+ ~}) -> compiletext
+  selector <- '$' %alphanum+ ('|' %alphanum+)*
+  templateappl <- (%state {<selector>} {~ <args>? ~} {%longstring?} (%s ',' %s {%longstring})* -> {}) 
+      -> compileapplication
+  args <- '{' %s '}' / '{' %s <arg> %s (',' %s <arg> %s)* ','? %s '}'
+  arg <- <attr> / <literal>
+  attr <- <symbol> %s '=' %s <literal> / '[' %s <literal> %s ']' %s '=' %s <literal>
+  symbol <- %alpha %alphanum*
+  literal <- <args> / %string / %number / 'true' / 'false' / 'nil' / {<selector>} -> parseselector
 ]]
 
 local syntax_defs = {
@@ -64,16 +65,14 @@ local syntax_defs = {
   number = number,
   string = shortstring,
   longstring = longstring,
-  ['_'] = space,
-  parse_selector = function (state, selector)
-		      selector = selector or state
-		      return parse_selector(selector)
-		   end
+  s = space,
+  parseselector = parse_selector,
+  state = lpeg.Carg(1)
 }
 
 function cosmo_compiler(compiler_funcs)
-   syntax_defs.compile_template = compiler_funcs.template
-   syntax_defs.compile_text = compiler_funcs.text
-   syntax_defs.compile_application = compiler_funcs.template_application
+   syntax_defs.compiletemplate = compiler_funcs.template
+   syntax_defs.compiletext = compiler_funcs.text
+   syntax_defs.compileapplication = compiler_funcs.template_application
    return re.compile(syntax, syntax_defs)
 end

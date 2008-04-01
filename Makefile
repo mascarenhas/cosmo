@@ -9,10 +9,7 @@ endif
 $(config_file):
 	chmod +x configure
 
-all: src/cosmo/lpeg.so
-
-src/cosmo/lpeg.so: src/cosmo/lpeg.o
-	export MACOSX_DEPLOYMENT_TARGET="10.3"; $(CC) $(CFLAGS) $(LIB_OPTION) -o src/cosmo/lpeg.so src/cosmo/lpeg.o
+all:
 
 install: $(config_file)
 	mkdir -p $(LUA_DIR)
@@ -20,9 +17,6 @@ install: $(config_file)
 	cp src/cosmo.lua $(LUA_DIR)/
 	cp src/cosmo/grammar.lua $(LUA_DIR)/cosmo
 	cp src/cosmo/fill.lua $(LUA_DIR)/cosmo
-	cp src/cosmo/re.lua $(LUA_DIR)/cosmo
-	mkdir -p $(LUA_LIBDIR)/cosmo
-	cp src/cosmo/lpeg.so $(LUA_LIBDIR)/cosmo
 
 install-rocks: install
 	mkdir -p $(PREFIX)/samples
@@ -51,4 +45,3 @@ upload-dist:
 	ncftpput -u mascarenhas ftp.luaforge.net cosmo/htdocs doc/index.html
 
 clean:
-	rm src/cosmo/lpeg.o src/cosmo/lpeg.so
