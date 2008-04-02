@@ -13,7 +13,7 @@ without without the downside of allowing arbitrary code in the templates.
   homepage = "http://cosmo.luaforge.net"
 }
 
-dependencies = { }
+dependencies = { "lpeg >= 0.8.1" }
 
 source = {
   url = "http://cosmo.luaforge.net/cosmo-current.tar.gz"
