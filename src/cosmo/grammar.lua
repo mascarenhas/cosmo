@@ -56,7 +56,8 @@ local syntax = [[
   arg <- <attr> / <literal>
   attr <- <symbol> %s '=' %s <literal> / '[' %s <literal> %s ']' %s '=' %s <literal>
   symbol <- %alpha %alphanum*
-  literal <- <args> / %string / %number / 'true' / 'false' / 'nil' / {<selector>} -> parseselector
+  literal <- <args> / %string / %longstring / %number / 'true' / 'false' / 
+     'nil' / {<selector>} -> parseselector
 ]]
 
 local syntax_defs = {
