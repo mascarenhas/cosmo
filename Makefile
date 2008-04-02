@@ -31,7 +31,7 @@ test:
 	cd tests && lua -l luarocks.require test_cosmo.lua
 
 upload-cvs:
-	darcs dist -d alien-current
+	darcs dist -d cosmo-current
 	ncftpput -u mascarenhas ftp.luaforge.net cosmo/htdocs cosmo-current.tar.gz
 
 dist:
