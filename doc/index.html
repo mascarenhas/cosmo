@@ -40,7 +40,8 @@ code in the templates.</p>
 
 <h1><a name="Overview"></a>Installation</h1>
 
-<p>The current version of Cosmo is 8.02.18.</p>
+<p>The current version of Cosmo is 8.04.04. This is a maintenance release
+for compatibility with LPEG 0.8.1.</p>
 
 <p>Cosmo is installed as a rock. To install the most recent release
 do <code>luarocks install cosmo</code>. The Cosmo rock is in the standard
@@ -70,7 +71,7 @@ The table provides the values.  <code>$rank</code> will get replaced by
 - and returns a function that then takes the second parameter.  This
 allows for a more compact notation:</p>
 
-<pre><code>&gt; = cosmo.fill(template){ rank="Ace", suit="Spades" } 
+<pre><code>&gt; = cosmo.f(template){ rank="Ace", suit="Spades" } 
 Ace of Spades
 </code></pre>
 
@@ -90,7 +91,8 @@ Ace of Spades
 <h2>Arguments</h2>
 
 <p>You can also pass arguments to a selector using the syntax <em>$selector{ args }</em>.
-Each argument can be a list of arguments enclosed by {}, a number, a string literal,
+Each argument can be a list of arguments enclosed by {}, a number, a string literal
+(including long strings),
 a <em>key = value</em> pair, where key is a valid Lua name and value is an argument,
 a <em>[key] = value</em> pair, where key and value are both arguments, <code>true</code>, <code>false</code>, 
 <code>nil</code>, or a Cosmo selector.
@@ -311,12 +313,17 @@ and <code>cosmo.inject</code>. Both functions have to be passed in a template's 
 The <code>cosmo.map</code> function yields each of its arguments in sequence, and inject yields
 its whole argument table. A simple example:</p>
 
-<pre><code>&gt; template = "&lt;ol&gt;$map{ 1, 2, 3, 4}[[&lt;li&gt;$it&lt;/li&gt;]]&lt;/ol&gt;"
+<pre><code>&gt; template = "&lt;ol&gt;\n$map{ 'Spades', 'Hearts', 'Clubs', 'Diamonds'}[[&lt;li&gt;$it&lt;/li&gt;\n]]&lt;/ol&gt;"
 &gt; = cosmo.fill(template, { map = cosmo.map })
-&lt;ol&gt;&lt;li&gt;1&lt;/li&gt;&lt;li&gt;2&lt;/li&gt;&lt;li&gt;3&lt;/li&gt;&lt;li&gt;4&lt;/li&gt;&lt;/ol&gt;
-&gt; template = "$inject{ message = 'Hello', target = 'World' }[[$message &lt;b&gt;$target&lt;/b&gt;!]]"
+&lt;ol&gt;
+&lt;li&gt;Spades&lt;/li&gt;
+&lt;li&gt;Hearts&lt;/li&gt;
+&lt;li&gt;Clubs&lt;/li&gt;
+&lt;li&gt;Diamonds&lt;/li&gt;
+&lt;/ol&gt;
+&gt; template = "$inject{ suit = 'Spades' }[[Ace of &lt;b&gt;$suit&lt;/b&gt;]]"
 &gt; = cosmo.fill(template, { inject = cosmo.inject })
-Hello &lt;b&gt;World&lt;/b&gt;!
+Ace of &lt;b&gt;Spades&lt;/b&gt;
 </code></pre>
 
 <h1><a name="Contact"></a> Contact Us</h1>
