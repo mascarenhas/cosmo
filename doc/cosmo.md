@@ -42,7 +42,8 @@ code in the templates.
 <a name="Overview"></a>Installation
 =================================================
 
-The current version of Cosmo is 8.02.18.
+The current version of Cosmo is 8.04.04. This is a maintenance release
+for compatibility with LPEG 0.8.1.
 
 Cosmo is installed as a rock. To install the most recent release
 do `luarocks install cosmo`. The Cosmo rock is in the standard
@@ -72,7 +73,7 @@ The table provides the values.  `$rank` will get replaced by
 - and returns a function that then takes the second parameter.  This
 allows for a more compact notation:
 
-    > = cosmo.fill(template){ rank="Ace", suit="Spades" } 
+    > = cosmo.f(template){ rank="Ace", suit="Spades" } 
     Ace of Spades
 
 ## Nested Values
@@ -90,7 +91,8 @@ As you can see above, you can either use numbers or strings as keys.
 ## Arguments
 
 You can also pass arguments to a selector using the syntax *$selector{ args }*.
-Each argument can be a list of arguments enclosed by {}, a number, a string literal,
+Each argument can be a list of arguments enclosed by {}, a number, a string literal
+(including long strings),
 a *key = value* pair, where key is a valid Lua name and value is an argument,
 a *[key] = value* pair, where key and value are both arguments, `true`, `false`, 
 `nil`, or a Cosmo selector.
@@ -301,12 +303,17 @@ and `cosmo.inject`. Both functions have to be passed in a template's environment
 The `cosmo.map` function yields each of its arguments in sequence, and inject yields
 its whole argument table. A simple example:
 
-    > template = "<ol>$map{ 1, 2, 3, 4}[[<li>$it</li>]]</ol>"
+    > template = "<ol>\n$map{ 'Spades', 'Hearts', 'Clubs', 'Diamonds'}[[<li>$it</li>\n]]</ol>"
     > = cosmo.fill(template, { map = cosmo.map })
-    <ol><li>1</li><li>2</li><li>3</li><li>4</li></ol>
-    > template = "$inject{ message = 'Hello', target = 'World' }[[$message <b>$target</b>!]]"
+    <ol>
+    <li>Spades</li>
+    <li>Hearts</li>
+    <li>Clubs</li>
+    <li>Diamonds</li>
+    </ol>
+    > template = "$inject{ suit = 'Spades' }[[Ace of <b>$suit</b>]]"
     > = cosmo.fill(template, { inject = cosmo.inject })
-    Hello <b>World</b>!
+    Ace of <b>Spades</b>
 
 <a name="Contact"></a> Contact Us
 =================================================
