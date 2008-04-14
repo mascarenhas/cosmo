@@ -19,7 +19,12 @@ local compiled_template = [[
         if meta and meta.__index then
           local index = meta.__index
           meta.__index = function (t, k)
-                           local v = index[k]
+			   local v
+			   if type(index) == "table" then 
+			     v = index[k] 
+			   else
+			     v = index(t, k)
+			   end
                            if not v then v = parent[k] end
                            return v
                          end
