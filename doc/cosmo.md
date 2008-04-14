@@ -42,8 +42,9 @@ code in the templates.
 <a name="Overview"></a>Installation
 =================================================
 
-The current version of Cosmo is 8.04.04. This is a maintenance release
-for compatibility with LPEG 0.8.1.
+The current version of Cosmo is 8.04.14. This version corrects
+scoping in the presence of __index metamethods, and tolerates
+missing subtemplates.
 
 Cosmo is installed as a rock. To install the most recent release
 do `luarocks install cosmo`. The Cosmo rock is in the standard
