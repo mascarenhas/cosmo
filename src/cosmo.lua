@@ -9,12 +9,26 @@ module(..., package.seeall)
 yield = coroutine.yield
 
 local compiled_template = [[
+      local concat = table.concat
+      local insert = table.insert
+      local compile = compile
+      local getmetatable = getmetatable
+      local setmetatable = setmetatable
+      local function prepare_env(env, parent)
+        local meta = getmetatable(env)
+        if meta and meta.__index then
+          local index = meta.__index
+          meta.__index = function (t, k)
+                           local v = index[k]
+                           if not v then v = parent[k] end
+                           return v
+                         end
+        else
+          setmetatable(env, { __index = parent })
+        end
+      end
+      local function id() return "" end
       return function (env)
-		local concat = table.concat
-		local insert = table.insert
-		local compile = compile
-		local getmetatable = getmetatable
-		local setmetatable = setmetatable
 		local out = {}
 		if type(env) == "string" then env = { it = env } end
 		$parts[=[
@@ -34,8 +48,8 @@ local compiled_template = [[
 				     if type(e) ~= "table" then
 					e = { it = tostring(e) }
 				     end
-				     if not getmetatable(e) then  setmetatable(e, { __index = env }) end
-				     insert(out, subtemplates[rawget(e, '_template') or 1](e))
+				     prepare_env(e, env) 
+				     insert(out, (subtemplates[rawget(e, '_template') or 1] or id)(e))
 				  end
 			    ]===],
 			    [===[
@@ -44,16 +58,16 @@ local compiled_template = [[
 					if type(e) ~= "table" then
 					   e = { it = tostring(e) }
 					end
-					if not getmetatable(e) then setmetatable(e, { __index = env }) end
-					insert(out, subtemplates[rawget(e, '_template') or 1](e))
+					prepare_env(e, env) 
+					insert(out, (subtemplates[rawget(e, '_template') or 1] or id)(e))
 				     end
 				  else
 				     for e in coroutine.wrap(selector), nil, true do
 					if type(e) ~= "table" then
 					   e = { it = tostring(e) }
 					end
-					if not getmetatable(e) then setmetatable(e, { __index = env }) end
-					insert(out, subtemplates[rawget(e, '_template') or 1](e))
+					prepare_env(e, env) 
+					insert(out, (subtemplates[rawget(e, '_template') or 1] or id)(e))
 				     end
 				  end
 			    ]===]
