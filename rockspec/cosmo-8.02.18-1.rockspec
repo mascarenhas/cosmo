@@ -16,7 +16,7 @@ without without the downside of allowing arbitrary code in the templates.
 dependencies = { }
 
 source = {
-  url = "http://www.lua.inf.puc-rio.br/~mascarenhas/cosmo/cosmo-8.02.18.tar.gz"
+  url = "http://cosmo.luaforge.net/cosmo-8.02.18.tar.gz"
 }
 
 build = {
