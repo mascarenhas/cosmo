@@ -1,6 +1,6 @@
 package = "Cosmo"
 
-version = "current-1"
+version = "8.04.14-2"
 
 description = {
   summary = "Safe templates for Lua",
@@ -16,7 +16,7 @@ without without the downside of allowing arbitrary code in the templates.
 dependencies = { "lpeg >= 0.8.1" }
 
 source = {
-  url = "http://cosmo.luaforge.net/cosmo-current.tar.gz"
+  url = "http://cosmo.luaforge.net/cosmo-8.04.14.tar.gz"
 }
 
 build = {
