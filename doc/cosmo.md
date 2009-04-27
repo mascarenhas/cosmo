@@ -1,4 +1,3 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
  <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
@@ -316,6 +315,35 @@ its whole argument table. A simple example:
     > = cosmo.fill(template, { inject = cosmo.inject })
     Ace of <b>Spades</b>
 
+## If
+
+Subtemplates and arguments let you implement a more generic conditional:
+
+    > template = "$do_players[=[$player: $n card$if{ $plural }[[s]]
+                       $if{ $more, $n_more }[[(needs $2 more)]],[[(no more needed)]]\n]=]"
+    > = cosmo.f(template){
+           do_players = function()
+              for i,p in ipairs(players) do
+                 cosmo.yield {
+                    player = p,
+                    n = #cards[p],
+                    ["if"] = function (arg)
+		               if arg[1] then arg._template = 1 else arg._template = 2 end
+		               cosmo.yield(arg)
+    	                     end,
+                    plural = #cards[p] > 1,
+                    more = #cards[p] < 3,
+                    n_more = 3 - #cards[p]
+                 }         
+              end
+           end
+        }
+
+    John: 4 cards (no more needed)
+    João: 1 card (needs 2 more)   
+
+You can embellish the "$if" template function as much as you want.
+    
 <a name="Contact"></a> Contact Us
 =================================================
 
