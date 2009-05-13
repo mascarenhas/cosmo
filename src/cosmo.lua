@@ -213,3 +213,13 @@ end
 function inject(arg)
    cosmo.yield(arg)
 end
+
+function cif(arg, has_block)
+  if not has_block then error("this selector needs a block") end
+  if arg[1] then
+    arg._template = 1
+  else
+    arg._template = 2
+  end
+  cosmo.yield(arg)
+end

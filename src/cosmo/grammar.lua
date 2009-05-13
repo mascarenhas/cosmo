@@ -37,6 +37,8 @@ local n = lpeg.R'09'
 
 local alphanum = alpha + n
 
+local name = alpha * (alphanum)^0
+
 local number = (lpeg.P'.' + n)^1 * (lpeg.S'eE' * lpeg.S'+-'^-1)^-1 * (alphanum)^0
 number = #(n + (lpeg.P'.' * n)) * number
 
@@ -53,27 +55,37 @@ local syntax = [[
   templateappl <- (%state {<selector>} {~ <args>? ~} {%longstring?} (%s ',' %s {%longstring})* -> {}) 
       -> compileapplication
   args <- '{' %s '}' / '{' %s <arg> %s (',' %s <arg> %s)* ','? %s '}'
-  arg <- <attr> / <literal>
-  attr <- <symbol> %s '=' %s <literal> / '[' %s <literal> %s ']' %s '=' %s <literal>
+  arg <- <attr> / <exp>
+  attr <- <symbol> %s '=' %s <exp> / '[' %s <exp> %s ']' %s '=' %s <exp>
   symbol <- %alpha %alphanum*
-  literal <- <args> / %string / %longstring / %number / 'true' / 'false' / 
-     'nil' / {<selector>} -> parseselector
+  explist <- <exp> (%s ',' %s <exp>)* (%s ',')?
+  exp <- <simpleexp> (%s <binop> %s <simpleexp>)*
+  simpleexp <- <args> / %string / %longstring / %number / 'true' / 'false' / 
+     'nil' / <prefixexp> / <unop> %s <exp>
+  unop <- '-' / 'not' / '#' 
+  binop <- '+' / '-' / '*' / '/' / '^' / '%' / '..' / '<' / '<=' / '>' / '>=' / '==' / '~=' /
+     'and' / 'or'
+  prefixexp <- ( {<selector>} -> parseselector / {%name} -> addenv / '(' %s <exp> %s ')' ) 
+    ( %s <args> / '.' %name / ':' %name / '[' %s <exp> %s ']' /'(' %s <explist> %s ')' / 
+      %string / %longstring %s )*
 ]]
 
 local syntax_defs = {
   alpha = alpha,
   alphanum = alphanum,
+  name = name,
   number = number,
   string = shortstring,
   longstring = longstring,
   s = space,
   parseselector = parse_selector,
+  addenv = function (s) return "env['" .. s .. "']" end,
   state = lpeg.Carg(1)
 }
 
 function cosmo_compiler(compiler_funcs)
    syntax_defs.compiletemplate = compiler_funcs.template
-   syntax_defs.compiletext = compiler_funcs.text
+  syntax_defs.compiletext = compiler_funcs.text
    syntax_defs.compileapplication = compiler_funcs.template_application
    return re.compile(syntax, syntax_defs)
 end
