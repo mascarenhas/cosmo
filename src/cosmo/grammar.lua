@@ -49,11 +49,12 @@ local space = (lpeg.S'\n \t\r\f')^0
  
 local syntax = [[
   template <- (%state <item>* -> {} !.) -> compiletemplate
-  item <- <text> / <templateappl>
+  item <- <text> / <templateappl> / (. => error)
   text <- (%state {~ (!<selector> ('$$' -> '$' / .))+ ~}) -> compiletext
   selector <- '$' %alphanum+ ('|' %alphanum+)*
-  templateappl <- (%state {<selector>} {~ <args>? ~} {%longstring?} (%s ',' %s {%longstring})* -> {}) 
-      -> compileapplication
+  templateappl <- (%state {<selector>} {~ <args>? ~} !'{' 
+		   {%longstring?} !%start (%s ',' %s {%longstring})* -> {} !(',' %s %start)) 
+		     -> compileapplication
   args <- '{' %s '}' / '{' %s <arg> %s (',' %s <arg> %s)* ','? %s '}'
   arg <- <attr> / <exp>
   attr <- <symbol> %s '=' %s <exp> / '[' %s <exp> %s ']' %s '=' %s <exp>
@@ -61,7 +62,7 @@ local syntax = [[
   explist <- <exp> (%s ',' %s <exp>)* (%s ',')?
   exp <- <simpleexp> (%s <binop> %s <simpleexp>)*
   simpleexp <- <args> / %string / %longstring / %number / 'true' / 'false' / 
-     'nil' / <prefixexp> / <unop> %s <exp>
+     'nil' / <prefixexp> / <unop> %s <exp> / (. => error)
   unop <- '-' / 'not' / '#' 
   binop <- '+' / '-' / '*' / '/' / '^' / '%' / '..' / '<' / '<=' / '>' / '>=' / '==' / '~=' /
      'and' / 'or'
@@ -71,7 +72,20 @@ local syntax = [[
     %string / %longstring %s )*
 ]]
 
+local function pos_to_line(str, pos)
+  local s = str:sub(1, pos)
+  local line, start = 1, 0
+  local newline = string.find(s, "\n")
+  while newline do
+    line = line + 1
+    start = newline
+    newline = string.find(s, "\n", newline + 1)
+  end
+  return line, pos - start
+end
+
 local syntax_defs = {
+  start = start,
   alpha = alpha,
   alphanum = alphanum,
   name = name,
@@ -81,12 +95,16 @@ local syntax_defs = {
   s = space,
   parseselector = parse_selector,
   addenv = function (s) return "env['" .. s .. "']" end,
-  state = lpeg.Carg(1)
+  state = lpeg.Carg(1),
+  error = function (tmpl, pos)
+    	        local line, pos = pos_to_line(tmpl, pos)
+		error("syntax error in template at line " .. line .. " position " .. pos)
+	      end
 }
 
 function cosmo_compiler(compiler_funcs)
    syntax_defs.compiletemplate = compiler_funcs.template
-  syntax_defs.compiletext = compiler_funcs.text
+   syntax_defs.compiletext = compiler_funcs.text
    syntax_defs.compileapplication = compiler_funcs.template_application
    return re.compile(syntax, syntax_defs)
 end
