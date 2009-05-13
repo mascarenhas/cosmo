@@ -26,5 +26,5 @@ build = {
      ["cosmo.fill"] = "src/cosmo/fill.lua",
      ["cosmo.grammar"] = "src/cosmo/grammar.lua",
    },
-   copy_directories = { "doc", "samples", "test" }
+   copy_directories = { "doc", "samples", "tests" }
 }
