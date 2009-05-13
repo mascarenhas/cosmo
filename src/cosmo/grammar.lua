@@ -67,8 +67,8 @@ local syntax = [[
   binop <- '+' / '-' / '*' / '/' / '^' / '%' / '..' / '<=' / '<' / '>=' / '>' / '==' / '~=' /
      'and' / 'or'
   prefixexp <- ( {<selector>} -> parseselector / {%name} -> addenv / '(' %s <exp> %s ')' ) 
-    ( %s <args> / '.' %name / ':' %name %s '(' %s <explist> %s ')' / 
-    '[' %s <exp> %s ']' /'(' %s <explist> %s ')' / 
+    ( %s <args> / '.' %name / ':' %name %s ('(' %s ')' / '(' %s <explist> %s ')') / 
+    '[' %s <exp> %s ']' / '(' %s ')' / '(' %s <explist> %s ')' / 
     %string / %longstring %s )*
 ]]
 
