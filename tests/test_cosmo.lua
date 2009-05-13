@@ -319,16 +319,16 @@ result = cosmo.f(template){ x = 2, ["if"] = cosmo.cif }
 assert(result == " Hello World! ")
 
 template = "$if{ $mod($x, 4) == 0, target = 'World' }[[ Hello $target! ]],[[ Hi $target! ]]"
-result = cosmo.fill(template, { mod = math.mod, x = 2, ["if"] = cosmo.cif })
+result = cosmo.fill(template, { mod = math.fmod, x = 2, ["if"] = cosmo.cif })
 assert(result == " Hi World! ")
-result = cosmo.f(template){ mod = math.mod, x = 2, ["if"] = cosmo.cif }
+result = cosmo.f(template){ mod = math.fmod, x = 2, ["if"] = cosmo.cif }
 assert(result == " Hi World! ")
-result = cosmo.fill(template, { mod = math.mod, x = 4, ["if"] = cosmo.cif })
+result = cosmo.fill(template, { mod = math.fmod, x = 4, ["if"] = cosmo.cif })
 assert(result == " Hello World! ")
-result = cosmo.f(template){ mod = math.mod, x = 4, ["if"] = cosmo.cif }
+result = cosmo.f(template){ mod = math.fmod, x = 4, ["if"] = cosmo.cif }
 assert(result == " Hello World! ")
 
-template = "$if{ math.mod(x, 4) == 0, target = 'World' }[[ Hello $target! ]],[[ Hi $target! ]]"
+template = "$if{ math.fmod(x, 4) == 0, target = 'World' }[[ Hello $target! ]],[[ Hi $target! ]]"
 result = cosmo.fill(template, { math = math, x = 2, ["if"] = cosmo.cif })
 assert(result == " Hi World! ")
 result = cosmo.f(template){ math = math, x = 2, ["if"] = cosmo.cif }
