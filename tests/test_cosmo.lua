@@ -337,3 +337,13 @@ result = cosmo.fill(template, { math = math, x = 4, ["if"] = cosmo.cif })
 assert(result == " Hello World! ")
 result = cosmo.f(template){ math = math, x = 4, ["if"] = cosmo.cif }
 assert(result == " Hello World! ")
+
+template = "$if{ x == 0, target = 'World' }[[ Hello $target! ]],[[ Hi $target! ]]"
+result = cosmo.fill(template, { math = math, x = 4, ["if"] = cosmo.cif })
+assert(result == " Hi World! ")
+result = cosmo.f(template){ math = math, x = 4, ["if"] = cosmo.cif }
+assert(result == " Hi World! ")
+result = cosmo.fill(template, { math = math, x = 0, ["if"] = cosmo.cif })
+assert(result == " Hello World! ")
+result = cosmo.f(template){ math = math, x = 0, ["if"] = cosmo.cif }
+assert(result == " Hello World! ")

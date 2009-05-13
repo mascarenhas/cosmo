@@ -57,14 +57,14 @@ local syntax = [[
 		     -> compileapplication
   args <- '{' %s '}' / '{' %s <arg> %s (',' %s <arg> %s)* ','? %s '}'
   arg <- <attr> / <exp>
-  attr <- <symbol> %s '=' %s <exp> / '[' %s <exp> %s ']' %s '=' %s <exp>
+  attr <- <symbol> %s '=' !'=' %s <exp> / '[' %s <exp> %s ']' %s '=' %s <exp>
   symbol <- %alpha %alphanum*
   explist <- <exp> (%s ',' %s <exp>)* (%s ',')?
   exp <- <simpleexp> (%s <binop> %s <simpleexp>)*
   simpleexp <- <args> / %string / %longstring / %number / 'true' / 'false' / 
      'nil' / <prefixexp> / <unop> %s <exp> / (. => error)
   unop <- '-' / 'not' / '#' 
-  binop <- '+' / '-' / '*' / '/' / '^' / '%' / '..' / '<' / '<=' / '>' / '>=' / '==' / '~=' /
+  binop <- '+' / '-' / '*' / '/' / '^' / '%' / '..' / '<=' / '<' / '>=' / '>' / '==' / '~=' /
      'and' / 'or'
   prefixexp <- ( {<selector>} -> parseselector / {%name} -> addenv / '(' %s <exp> %s ')' ) 
     ( %s <args> / '.' %name / ':' %name %s '(' %s <explist> %s ')' / 
