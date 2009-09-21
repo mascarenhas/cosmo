@@ -38,8 +38,8 @@ dist:
 	darcs dist -d cosmo-$(VERSION)
 
 upload-dist:
-	darcs push 139.82.100.4:public_html/cosmo/current
-	ssh 139.82.100.4 "cd public_html/cosmo/current && make dist VERSION=$(VERSION)"
+#	darcs push 139.82.100.4:public_html/cosmo/current
+#	ssh 139.82.100.4 "cd public_html/cosmo/current && make dist VERSION=$(VERSION)"
 	darcs dist -d cosmo-$(VERSION)
 	ncftpput -u mascarenhas ftp.luaforge.net cosmo/htdocs cosmo-$(VERSION).tar.gz
 	ncftpput -u mascarenhas ftp.luaforge.net cosmo/htdocs doc/index.html
