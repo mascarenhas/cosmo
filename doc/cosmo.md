@@ -41,10 +41,9 @@ code in the templates.
 <a name="Overview"></a>Installation
 =================================================
 
-The current version of Cosmo is 8.04.14. This version corrects
-scoping in the presence of __index metamethods, and tolerates
-missing subtemplates.
-
+The current version of Cosmo is 9.09.22. This version adds expressions to
+selector arguments, and adds more error detection when compiling templates.
+ 
 Cosmo is installed as a rock. To install the most recent release
 do `luarocks install cosmo`. The Cosmo rock is in the standard
 repository. Installation on UNIX-based systems need the gcc toolchain.
@@ -90,13 +89,9 @@ As you can see above, you can either use numbers or strings as keys.
 
 ## Arguments
 
-You can also pass arguments to a selector using the syntax *$selector{ args }*.
-Each argument can be a list of arguments enclosed by {}, a number, a string literal
-(including long strings),
-a *key = value* pair, where key is a valid Lua name and value is an argument,
-a *[key] = value* pair, where key and value are both arguments, `true`, `false`, 
-`nil`, or a Cosmo selector.
-If the argument is a selector it is looked up in the template environment.
+You can also pass arguments to a selector using the syntax *$selector{ args }*. The syntax
+for the argument list is the same as a Lua table constructor, but function definitions are
+not allowed, and you can use template selectors, which are looked up in the template environment.
 
 If you pass an argument list and the selector maps to a function then Cosmo calls
 this function with the argument list as a table, and the selector expands to what
@@ -342,8 +337,15 @@ Subtemplates and arguments let you implement a more generic conditional:
     John: 4 cards (no more needed)
     João: 1 card (needs 2 more)   
 
-You can embellish the "$if" template function as much as you want.
-    
+The conditional above is already present in Cosmo as `cosmo.cif`. Expressions in arguments
+make it more useful:
+
+    > template = "$if{ math.fmod(x, 4) == 0, target = 'World' }[[ Hello $target! ]],
+       [[ Hi $target! ]]"
+    > result = cosmo.fill(template, { math = math, x = 2, ["if"] = cosmo.cif })
+    > assert(result == " Hi World! ")
+
+
 <a name="Contact"></a> Contact Us
 =================================================
 
@@ -374,7 +376,7 @@ much feedback and inspiration by André Carregal. This version is a reimplementa
 by Fabio Mascarenhas, with aditional features. The implementations
 are not derived from licensed software.
 
-Copyright © 2008 Fabio Mascarenhas.
+Copyright © 2008-2009 Fabio Mascarenhas.
 Copyright © 2007-2008 Yuri Takhteyev.
 
 ---------------------------------

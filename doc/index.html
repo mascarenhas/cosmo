@@ -42,9 +42,8 @@ code in the templates.</p>
 
 <h1><a name="Overview"></a>Installation</h1>
 
-<p>The current version of Cosmo is 8.04.14. This version corrects
-scoping in the presence of __index metamethods, and tolerates
-missing subtemplates.</p>
+<p>The current version of Cosmo is 9.09.22. This version adds expressions to
+selector arguments, and adds more error detection when compiling templates.</p>
 
 <p>Cosmo is installed as a rock. To install the most recent release
 do <code>luarocks install cosmo</code>. The Cosmo rock is in the standard
@@ -93,13 +92,9 @@ Ace of Spades
 
 <h2>Arguments</h2>
 
-<p>You can also pass arguments to a selector using the syntax <em>$selector{ args }</em>.
-Each argument can be a list of arguments enclosed by {}, a number, a string literal
-(including long strings),
-a <em>key = value</em> pair, where key is a valid Lua name and value is an argument,
-a <em>[key] = value</em> pair, where key and value are both arguments, <code>true</code>, <code>false</code>,
-<code>nil</code>, or a Cosmo selector.
-If the argument is a selector it is looked up in the template environment.</p>
+<p>You can also pass arguments to a selector using the syntax <em>$selector{ args }</em>. The syntax
+for the argument list is the same as a Lua table constructor, but function definitions are
+not allowed, and you can use template selectors, which are looked up in the template environment.</p>
 
 <p>If you pass an argument list and the selector maps to a function then Cosmo calls
 this function with the argument list as a table, and the selector expands to what
@@ -357,7 +352,14 @@ John: 4 cards (no more needed)
 João: 1 card (needs 2 more)   
 </code></pre>
 
-<p>You can embellish the &ldquo;$if&rdquo; template function as much as you want.</p>
+<p>The conditional above is already present in Cosmo as <code>cosmo.cif</code>. Expressions in arguments
+make it more useful:</p>
+
+<pre><code>&gt; template = "$if{ math.fmod(x, 4) == 0, target = 'World' }[[ Hello $target! ]],
+   [[ Hi $target! ]]"
+&gt; result = cosmo.fill(template, { math = math, x = 2, ["if"] = cosmo.cif })
+&gt; assert(result == " Hi World! ")
+</code></pre>
 
 <h1><a name="Contact"></a> Contact Us</h1>
 
@@ -387,7 +389,7 @@ much feedback and inspiration by André Carregal. This version is a reimplementa
 by Fabio Mascarenhas, with aditional features. The implementations
 are not derived from licensed software.</p>
 
-<p>Copyright © 2008 Fabio Mascarenhas.
+<p>Copyright © 2008-2009 Fabio Mascarenhas.
 Copyright © 2007-2008 Yuri Takhteyev.</p>
 
 <hr />
