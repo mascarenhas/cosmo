@@ -57,7 +57,7 @@ local syntax = [[
 		     -> compileapplication
   args <- '{' %s '}' / '{' %s <arg> %s (',' %s <arg> %s)* ','? %s '}'
   arg <- <attr> / <exp>
-  attr <- <symbol> %s '=' !'=' %s <exp> / '[' %s <exp> %s ']' %s '=' %s <exp>
+  attr <- <symbol> %s '=' !'=' %s <exp> / '[' !'[' !'=' %s <exp> %s ']' %s '=' %s <exp>
   symbol <- %alpha %alphanum*
   explist <- <exp> (%s ',' %s <exp>)* (%s ',')?
   exp <- <simpleexp> (%s <binop> %s <simpleexp>)*
