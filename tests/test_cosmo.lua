@@ -286,6 +286,12 @@ assert(result == " 12345 ")
 result = cosmo.f(template){ map = cosmo.map }
 assert(result == " 12345 ")
 
+template = " $map{ 1, [[foo]], 3, 4, 5}[[$it]] "
+result = cosmo.fill(template, { map = cosmo.map })
+assert(result == " 1foo345 ")
+result = cosmo.f(template){ map = cosmo.map }
+assert(result == " 1foo345 ")
+
 template = " $map{ 1, 2, 3, 4, 5} "
 result = cosmo.fill(template, { map = cosmo.map })
 assert(result == " 12345 ")
