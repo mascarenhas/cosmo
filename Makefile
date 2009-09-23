@@ -31,16 +31,16 @@ test:
 	cd tests && lua -l luarocks.require test_cosmo.lua
 
 upload-cvs:
-	darcs dist -d cosmo-current
+	git archive --output=cosmo-current.tar.gz master
 	ncftpput -u mascarenhas ftp.luaforge.net cosmo/htdocs cosmo-current.tar.gz
 
 dist:
-	darcs dist -d cosmo-$(VERSION)
+	git archive --output=cosmo-$(VERSION).tar.gz v$(VERSION)
 
 upload-dist:
 #	darcs push 139.82.100.4:public_html/cosmo/current
 #	ssh 139.82.100.4 "cd public_html/cosmo/current && make dist VERSION=$(VERSION)"
-	darcs dist -d cosmo-$(VERSION)
+	git archive --output=cosmo-$(VERSION).tar.gz v$(VERSION)
 	ncftpput -u mascarenhas ftp.luaforge.net cosmo/htdocs cosmo-$(VERSION).tar.gz
 	ncftpput -u mascarenhas ftp.luaforge.net cosmo/htdocs doc/index.html
 
