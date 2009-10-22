@@ -60,7 +60,7 @@ local function fill_template_application(state, selector, args, first_subtemplat
    if first_subtemplate ~= "" then 
      table.insert(subtemplates, 1, first_subtemplate) 
    end
-   selector = get_selector(env, selector) or selector
+   selector = loadstring("local env = (...); return " .. selector)(env) or function () return '' end
    if #subtemplates == 0 then
       if args and args ~= "" then
 	 if type(selector) == 'function' then

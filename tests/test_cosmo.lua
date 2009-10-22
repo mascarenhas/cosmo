@@ -87,6 +87,33 @@ result = cosmo.f(template){
         }
 assert(result=="John has Ace of Spades, Queen of Diamonds, 10 of Hearts, and 2 of Clubs\nJoão has Ace of Diamonds\n")
 
+players = {"John", "João"}
+cards = {}
+cards["John"] = mycards
+cards["João"] = { {"Ace", "Diamonds"} }
+template = "$do_players[[$player has $do_cards[[$rank of $suit]],[=[, $rank of $suit]=],[[, and $rank of $suit]]\n]]"
+result = cosmo.f(template){
+           do_players = function()
+              for i,p in ipairs(players) do
+                 cosmo.yield {
+                    player = p,
+                    do_cards = function()
+                       for i,v in ipairs(cards[p]) do
+                          local template
+                          if i == #mycards then -- for the last item use the third template (with "and")
+                             template = 3
+                          elseif i~=1 then -- use the second template for items 2...n-1
+                             template = 2
+                          end
+                          cosmo.yield{rank=v[1], suit=v[2], _template=template}
+                       end
+                    end
+                 }         
+             end
+          end
+        }
+assert(result=="John has Ace of Spades, Queen of Diamonds, 10 of Hearts, and 2 of Clubs\nJoão has Ace of Diamonds\n")
+
 template = "$do_players[=[$player$if_john[[$mark]] has $do_cards[[$rank of $suit, ]]\n]=]"
 result = cosmo.f(template){
            do_players = function()
@@ -157,11 +184,35 @@ template = " $foo|bar $foo|1|baz "
 result = cosmo.fill(template, { foo = { { baz = "World!" }, bar = "Hello" } })
 assert(result==" Hello World! ")
 
+template = " $(foo.bar) $(foo[1].baz) "
+result = cosmo.fill(template, { foo = { { baz = "World!" }, bar = "Hello" } })
+assert(result==" Hello World! ")
+
+template = " $(foo.bar) $(foo[1].baz) "
+result = cosmo.fill(template, { foo = { { baz = "World!" }, bar = "Hello" } })
+assert(result==" Hello World! ")
+
 template = " Hello $message{ 'World!' } "
 result = cosmo.fill(template, { message = function (arg) return arg[1] end })
 assert(result==" Hello World! ")
 
+template = " Hello $(message){ 'World!' } "
+result = cosmo.fill(template, { message = function (arg) return arg[1] end })
+assert(result==" Hello World! ")
+
+template = " Hello $(message){ 'World!' } "
+result = cosmo.fill(template, { message = function (arg) return arg[1] end })
+assert(result==" Hello World! ")
+
 template = " Hello $message{ $msg } "
+result = cosmo.fill(template, { msg = "World!", message = function (arg) return arg[1] end })
+assert(result==" Hello World! ")
+
+template = " Hello $message{ $(msg) } "
+result = cosmo.fill(template, { msg = "World!", message = function (arg) return arg[1] end })
+assert(result==" Hello World! ")
+
+template = " Hello $message{ $(msg) } "
 result = cosmo.fill(template, { msg = "World!", message = function (arg) return arg[1] end })
 assert(result==" Hello World! ")
 

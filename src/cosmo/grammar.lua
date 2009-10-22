@@ -4,7 +4,7 @@ local re = require "re"
 
 module(..., package.seeall)
 
-function parse_selector(selector, env)
+local function parse_selector(selector, env)
   env = env or "env"
   selector = string.sub(selector, 2, #selector)
   local parts = {}
@@ -17,6 +17,11 @@ function parse_selector(selector, env)
     end
   end
   return env .. table.concat(parts)
+end
+
+local function parse_exp(exp)
+--  return exp:sub(2, #exp - 1)
+  return exp
 end
 
 local start = "[" * lpeg.P"="^1 * "["
@@ -67,8 +72,9 @@ local syntax = [[
   template <- (%state <item>* -> {} !.) -> compiletemplate
   item <- <text> / <templateappl> / (. => error)
   text <- (%state {~ (!<selector> ('$$' -> '$' / .))+ ~}) -> compiletext
-  selector <- '$' %alphanum+ ('|' %alphanum+)*
-  templateappl <- (%state {<selector>} {~ <args>? ~} !'{' 
+  selector <- ('$(' %s {~ <exp> ~} %s ')') -> parseexp / 
+              ('$' %alphanum+ ('|' %alphanum+)*) -> parseselector
+  templateappl <- (%state {~ <selector> ~} {~ <args>? ~} !'{' 
 		   ({%longstring?}) !%start (%s ',' %s ({%longstring}))* -> {} !(',' %s %start)) 
 		     -> compileapplication
   args <- '{' %s '}' / '{' %s <arg> %s (',' %s <arg> %s)* ','? %s '}'
@@ -82,7 +88,7 @@ local syntax = [[
   unop <- '-' / 'not' / '#' 
   binop <- '+' / '-' / '*' / '/' / '^' / '%' / '..' / '<=' / '<' / '>=' / '>' / '==' / '~=' /
      'and' / 'or'
-  prefixexp <- ( {<selector>} -> parseselector / {%name} -> addenv / '(' %s <exp> %s ')' ) 
+  prefixexp <- ( <selector> / {%name} -> addenv / '(' %s <exp> %s ')' ) 
     ( %s <args> / '.' %name / ':' %name %s ('(' %s ')' / '(' %s <explist> %s ')') / 
     '[' %s <exp> %s ']' / '(' %s ')' / '(' %s <explist> %s ')' / 
     %string / %longstring -> parsels %s )*
@@ -110,6 +116,7 @@ local syntax_defs = {
   longstring = longstring,
   s = space,
   parseselector = parse_selector,
+  parseexp = parse_exp,
   parsels = parse_longstring,
   addenv = function (s) return "env['" .. s .. "']" end,
   state = lpeg.Carg(1),

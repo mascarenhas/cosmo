@@ -41,8 +41,7 @@ local compiled_template = [[
 		]=],
 		[=[
 		      local selector = $parsed_selector
-		      local selector_name = '$selector'
-		      if not selector then selector = '$selector' end
+		      if not selector then selector = '' end
 		      $if_subtemplate[==[
 			    local subtemplates = {}
 			    $subtemplates[===[
@@ -117,7 +116,7 @@ local function compile_template_application(chunkname, selector, args, first_sub
      table.insert(subtemplates, 1, first_subtemplate) 
    end
    local ta = { _template = 2, selector = selector, 
-      parsed_selector = grammar.parse_selector(selector) }
+      parsed_selector = selector }
    local do_subtemplates = function ()
 			      for i, subtemplate in ipairs(subtemplates) do
 				yield{ i = i, subtemplate = parse_longstring(subtemplate) }
