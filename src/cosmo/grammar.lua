@@ -19,9 +19,14 @@ function parse_selector(selector, env)
   return env .. table.concat(parts)
 end
 
-local start = "[" * lpeg.P"="^0 * "["
+local start = "[" * lpeg.P"="^1 * "["
 
-local longstring = lpeg.P(function (s, i)
+local longstring1 = lpeg.P{
+  "longstring",
+  longstring = lpeg.P"[[" * (lpeg.V"longstring" + (lpeg.P(1) - lpeg.P"]]"))^0 * lpeg.P"]]"
+}
+
+local longstring2 = lpeg.P(function (s, i)
   local l = lpeg.match(start, s, i)
   if not l then return nil end
   local p = lpeg.P("]" .. string.rep("=", l - i - 2) .. "]")
@@ -29,7 +34,18 @@ local longstring = lpeg.P(function (s, i)
   return lpeg.match(p, s, l)
 end)
 
-longstring = #("[" * lpeg.S"[=") * longstring
+--longstring = #("[" * lpeg.S"[=") * longstring
+
+local longstring = #("[" * lpeg.S"[=") * (longstring1 + longstring2)
+
+local function parse_longstring(s)
+  local start = s:match("^(%[=*%[)")
+  if start then 
+    return string.format("%q", s:sub(#start + 1, #s - #start))
+  else
+    return s
+  end
+end
 
 local alpha =  lpeg.R('__','az','AZ','\127\255') 
 
@@ -53,7 +69,7 @@ local syntax = [[
   text <- (%state {~ (!<selector> ('$$' -> '$' / .))+ ~}) -> compiletext
   selector <- '$' %alphanum+ ('|' %alphanum+)*
   templateappl <- (%state {<selector>} {~ <args>? ~} !'{' 
-		   {%longstring?} !%start (%s ',' %s {%longstring})* -> {} !(',' %s %start)) 
+		   ({%longstring?}) !%start (%s ',' %s ({%longstring}))* -> {} !(',' %s %start)) 
 		     -> compileapplication
   args <- '{' %s '}' / '{' %s <arg> %s (',' %s <arg> %s)* ','? %s '}'
   arg <- <attr> / <exp>
@@ -61,15 +77,15 @@ local syntax = [[
   symbol <- %alpha %alphanum*
   explist <- <exp> (%s ',' %s <exp>)* (%s ',')?
   exp <- <simpleexp> (%s <binop> %s <simpleexp>)*
-  simpleexp <- <args> / %string / %longstring / %number / 'true' / 'false' / 
-     'nil' / <prefixexp> / <unop> %s <exp> / (. => error)
+  simpleexp <- <args> / %string / %longstring -> parsels / %number / 'true' / 'false' / 
+     'nil' / <unop> %s <exp> / <prefixexp> / (. => error)
   unop <- '-' / 'not' / '#' 
   binop <- '+' / '-' / '*' / '/' / '^' / '%' / '..' / '<=' / '<' / '>=' / '>' / '==' / '~=' /
      'and' / 'or'
   prefixexp <- ( {<selector>} -> parseselector / {%name} -> addenv / '(' %s <exp> %s ')' ) 
     ( %s <args> / '.' %name / ':' %name %s ('(' %s ')' / '(' %s <explist> %s ')') / 
     '[' %s <exp> %s ']' / '(' %s ')' / '(' %s <explist> %s ')' / 
-    %string / %longstring %s )*
+    %string / %longstring -> parsels %s )*
 ]]
 
 local function pos_to_line(str, pos)
@@ -94,6 +110,7 @@ local syntax_defs = {
   longstring = longstring,
   s = space,
   parseselector = parse_selector,
+  parsels = parse_longstring,
   addenv = function (s) return "env['" .. s .. "']" end,
   state = lpeg.Carg(1),
   error = function (tmpl, pos)

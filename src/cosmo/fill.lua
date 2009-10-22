@@ -43,12 +43,23 @@ local function prepare_env(env, parent)
   end
 end
 
+local function parse_longstring(s)
+  local start = s:match("^(%[=*%[)")
+  if start then 
+    return string.format("%q", s:sub(#start + 1, #s - #start))
+  else
+    return s
+  end
+end
+
 local function fill_template_application(state, selector, args, first_subtemplate, 
 					 subtemplates)
    local fill = state.fill
    local env, out = state.env, state.out
    subtemplates = subtemplates or {}
-   if first_subtemplate ~= "" then table.insert(subtemplates, 1, first_subtemplate) end
+   if first_subtemplate ~= "" then 
+     table.insert(subtemplates, 1, first_subtemplate) 
+   end
    selector = get_selector(env, selector) or selector
    if #subtemplates == 0 then
       if args and args ~= "" then

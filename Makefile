@@ -31,11 +31,11 @@ test:
 	cd tests && lua -l luarocks.require test_cosmo.lua
 
 upload-cvs:
-	git archive --format=tar  master | gzip > cosmo-current.tar.gz
+	git archive --format=tar --prefix=cosmo-current/ master | gzip > cosmo-current.tar.gz
 	ncftpput -u mascarenhas ftp.luaforge.net cosmo/htdocs cosmo-current.tar.gz
 
 upload-dist:
-	git archive --format=tar v$(VERSION) | gzip > cosmo-$(VERSION).tar.gz
+	git archive --format=tar --prefix=cosmo-$(VERSION)/ v$(VERSION) | gzip > cosmo-$(VERSION).tar.gz
 	ncftpput -u mascarenhas ftp.luaforge.net cosmo/htdocs cosmo-$(VERSION).tar.gz
 	ncftpput -u mascarenhas ftp.luaforge.net cosmo/htdocs doc/index.html
 

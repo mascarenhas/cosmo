@@ -101,15 +101,26 @@ local function compile_text(chunkname, text)
    return { _template = 1, quoted_text = string.format("%q", text) }
 end
 
+local function parse_longstring(s)
+  local start = s:match("^(%[=*%[)")
+  if start then 
+    return string.format("%q", s:sub(#start + 1, #s - #start))
+  else
+    return s
+  end
+end
+
 local function compile_template_application(chunkname, selector, args, first_subtemplate, 
 					    subtemplates)
    subtemplates = subtemplates or {}
-   if first_subtemplate ~= "" then table.insert(subtemplates, 1, first_subtemplate) end
+   if first_subtemplate ~= "" then
+     table.insert(subtemplates, 1, first_subtemplate) 
+   end
    local ta = { _template = 2, selector = selector, 
       parsed_selector = grammar.parse_selector(selector) }
    local do_subtemplates = function ()
 			      for i, subtemplate in ipairs(subtemplates) do
-				 yield{ i = i, subtemplate = subtemplate }
+				yield{ i = i, subtemplate = parse_longstring(subtemplate) }
 			      end
 			   end
    if #subtemplates == 0 then
@@ -222,4 +233,25 @@ function cif(arg, has_block)
     arg._template = 2
   end
   cosmo.yield(arg)
+end
+
+function last(list)
+  return function ()
+	   local size = #list
+	   for i, e in ipairs(list) do
+	     if type(e) == "table" then
+	       if i == size then
+		 cosmo.yield(setmetatable({ _last = true }, { __index = e }))
+	       else
+		 cosmo.yield(e)
+	       end
+	     else
+	       if i == size then
+		 cosmo.yield{ it = e, _last = true }
+	       else
+		 cosmo.yield{ it = e }
+	       end
+	     end
+	   end
+	 end
 end
