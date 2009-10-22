@@ -3,6 +3,13 @@ local grammar = require "cosmo.grammar"
 
 module(..., package.seeall)
 
+local function is_callable(f)
+  if type(f) == "function" then return true end
+  local meta = getmetatable(f)
+  if meta and meta.__call then return true end
+  return false
+end
+
 local function get_selector(env, selector)
   selector = string.sub(selector, 2, #selector)
   local parts = {}
@@ -63,12 +70,10 @@ local function fill_template_application(state, selector, args, first_subtemplat
    selector = loadstring("local env = (...); return " .. selector)(env) or function () return '' end
    if #subtemplates == 0 then
       if args and args ~= "" then
-	 if type(selector) == 'function' then
-	    selector = selector(loadstring("local env = (...); return " .. args)(env), false)
-	 end
+	 selector = selector(loadstring("local env = (...); return " .. args)(env), false)
 	 insert(out, tostring(selector))
       else
-	 if type(selector) == 'function' then
+	 if is_callable(selector) then
 	    insert(out, tostring(selector()))
 	 else
 	    insert(out, tostring(selector))

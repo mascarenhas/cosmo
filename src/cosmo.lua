@@ -14,6 +14,7 @@ local compiled_template = [[
       local compile = compile
       local getmetatable = getmetatable
       local setmetatable = setmetatable
+      local is_callable = ...
       local function prepare_env(env, parent)
         local meta = getmetatable(env)
         if meta and meta.__index then
@@ -78,13 +79,11 @@ local compiled_template = [[
 		      ]==],
 		      [==[
 			    $if_args[===[
-				  if type(selector) == 'function' then
-				     selector = selector($args, false)
-				  end
+				  selector = selector($args, false)
 				  insert(out, tostring(selector))
 			    ]===],
 			    [===[
-				  if type(selector) == 'function' then
+				  if is_callable(selector) then
 				     insert(out, tostring(selector()))
 				  else
 				     insert(out, tostring(selector))
@@ -140,6 +139,13 @@ local function compile_template_application(chunkname, selector, args, first_sub
    return ta
 end
 
+local function is_callable(f)
+  if type(f) == "function" then return true end
+  local meta = getmetatable(f)
+  if meta and meta.__call then return true end
+  return false
+end
+
 local function compile_template(chunkname, compiled_parts)
    local template_code = interpreter.fill(compiled_template, { parts = compiled_parts })
    local template_func, err = loadstring(template_code, chunkname)
@@ -147,7 +153,7 @@ local function compile_template(chunkname, compiled_parts)
       error("syntax error when compiling template: " .. err)
    else
       setfenv(template_func, _M)
-      return template_func()
+      return template_func(is_callable)
    end
 end
 
