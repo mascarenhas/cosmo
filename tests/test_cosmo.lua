@@ -365,6 +365,26 @@ assert(result == " Hello World! ")
 result = cosmo.f(template){ x = 2, ["if"] = cosmo.cif }
 assert(result == " Hello World! ")
 
+template = "$if{ $x + 3 > 4, target = 'World' }[[ Hello $target! ]][[ Hi $target! ]]"
+result = cosmo.fill(template, { x = 0, ["if"] = cosmo.cif })
+assert(result == " Hi World! ")
+result = cosmo.f(template){ x = 0, ["if"] = cosmo.cif }
+assert(result == " Hi World! ")
+result = cosmo.fill(template, { x = 2, ["if"] = cosmo.cif })
+assert(result == " Hello World! ")
+result = cosmo.f(template){ x = 2, ["if"] = cosmo.cif }
+assert(result == " Hello World! ")
+
+template = "$if{ $x + 3 > 4, target = 'World' }[[ Hello $target! ]][[ Hi $target! ]]"
+result = cosmo.fill(template, { x = 0, ["if"] = cosmo.cif })
+assert(result == " Hi World! ")
+result = cosmo.f(template){ x = 0, ["if"] = cosmo.cif }
+assert(result == " Hi World! ")
+result = cosmo.fill(template, { x = 2, ["if"] = cosmo.cif })
+assert(result == " Hello World! ")
+result = cosmo.f(template){ x = 2, ["if"] = cosmo.cif }
+assert(result == " Hello World! ")
+
 template = "$if{ x + 3 > 4, target = 'World' }[[ Hello $target! ]],[[ Hi $target! ]]"
 result = cosmo.fill(template, { x = 0, ["if"] = cosmo.cif })
 assert(result == " Hi World! ")

@@ -26,6 +26,8 @@ end
 
 local start = "[" * lpeg.P"="^1 * "["
 
+local start_ls = "[" * lpeg.P"="^0 * "["
+
 local longstring1 = lpeg.P{
   "longstring",
   longstring = lpeg.P"[[" * (lpeg.V"longstring" + (lpeg.P(1) - lpeg.P"]]"))^0 * lpeg.P"]]"
@@ -75,7 +77,7 @@ local syntax = [[
   selector <- ('$(' %s {~ <exp> ~} %s ')') -> parseexp / 
               ('$' %alphanum+ ('|' %alphanum+)*) -> parseselector
   templateappl <- (%state {~ <selector> ~} {~ <args>? ~} !'{' 
-		   ({%longstring?}) !%start (%s ',' %s ({%longstring}))* -> {} !(',' %s %start)) 
+		   ({%longstring?}) (%s ','? %s ({%longstring}))* -> {} !(','? %s %start)) 
 		     -> compileapplication
   args <- '{' %s '}' / '{' %s <arg> %s (',' %s <arg> %s)* ','? %s '}'
   arg <- <attr> / <exp>
@@ -107,7 +109,7 @@ local function pos_to_line(str, pos)
 end
 
 local syntax_defs = {
-  start = start,
+  start = start_ls,
   alpha = alpha,
   alphanum = alphanum,
   name = name,
