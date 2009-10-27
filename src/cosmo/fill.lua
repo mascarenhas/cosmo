@@ -69,7 +69,7 @@ local function fill_template_application(state, selector, args, first_subtemplat
    end
    selector = loadstring("local env = (...); return " .. selector)(env) or function () return '' end
    if #subtemplates == 0 then
-      if args and args ~= "" then
+      if args and args ~= "" and args ~= "{}" then
 	 selector = selector(loadstring("local env = (...); return " .. args)(env), false)
 	 insert(out, tostring(selector))
       else
@@ -80,7 +80,7 @@ local function fill_template_application(state, selector, args, first_subtemplat
 	 end
       end
    else
-      if args and args ~= "" then
+      if args and args ~= "" and args ~= "{}" then
 	 args = loadstring("local env = (...); return " .. args)(env)
 	 for e in coroutine.wrap(selector), args, true do
 	    if type(e) ~= "table" then

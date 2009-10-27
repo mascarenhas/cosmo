@@ -122,13 +122,13 @@ local function compile_template_application(chunkname, selector, args, first_sub
 			      end
 			   end
    if #subtemplates == 0 then
-      if args and args ~= "" then
+      if args and args ~= "" and args ~= "{}" then
 	 ta.if_subtemplate = { { _template = 2, if_args = { { _template = 1, args = args } } } }
       else
 	 ta.if_subtemplate = { { _template = 2, if_args = { { _template = 2 } } } }
       end
    else
-      if args and args ~= "" then
+      if args and args ~= "" and args ~= "{}" then
 	 ta.if_subtemplate = { { _template = 1, subtemplates = do_subtemplates,
 	       if_args = { { _template = 1, args = args } } } }
       else
