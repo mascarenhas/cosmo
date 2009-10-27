@@ -272,6 +272,28 @@ result = cosmo.fill(template, { msg = "World!",
 	     end })
 assert(result==" Hello World! ")
 
+template = " Hello $message{ msg } "
+result = cosmo.fill(template, { msg = "World!", 
+   message = function (arg, has_block) 
+		if has_block then
+		   cosmo.yield{ it = arg[1] }
+		else
+		   return arg[1] 
+		end
+	     end })
+assert(result==" Hello World! ")
+
+template = " Hello $message{ msg } "
+result = cosmo.fill(template, { msg = "World!", 
+   message = function (arg, has_block) 
+		if has_block then
+		   cosmo.yield{ it = arg[1] }
+		else
+		   return arg[1] 
+		end
+	     end })
+assert(result==" Hello World! ")
+
 template = " Hello $message{ $msg }[[$it]] "
 result = cosmo.fill(template, { msg = "World!", 
    message = function (arg, has_block) 
