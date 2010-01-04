@@ -39,7 +39,34 @@ result = cosmo.f(template){
            end
         }
 assert(result=="You have: Ace of Spades, Queen of Diamonds, 10 of Hearts, and 2 of Clubs")
-   
+
+template = "$do_cards[[$1 of $2$sep]]"
+result= cosmo.f(template){do_cards = cosmo.make_concat(mycards)}
+assert(result=="Ace of Spades, Queen of Diamonds, 10 of Hearts, 2 of Clubs")
+
+template = "$concat{cards}[[$1 of $2$sep]]"
+result= cosmo.f(template){cards = mycards, concat = cosmo.concat}
+assert(result=="Ace of Spades, Queen of Diamonds, 10 of Hearts, 2 of Clubs")
+
+template = "$do_cards[[$it$sep]]"
+result= cosmo.f(template){do_cards = cosmo.make_concat{ "Ace of Spades", "Queen of Diamonds", "10 of Hearts" } }
+assert(result=="Ace of Spades, Queen of Diamonds, 10 of Hearts")
+
+template = "$concat{cards}[[$it$sep]]"
+result= cosmo.f(template){ cards = { "Ace of Spades", "Queen of Diamonds", "10 of Hearts" }, concat = cosmo.concat }
+assert(result=="Ace of Spades, Queen of Diamonds, 10 of Hearts")
+
+template = "$concat{cards}[[$1 of $2$sep]]"
+result= cosmo.f(template){cards = mycards, concat = cosmo.concat}
+assert(result=="Ace of Spades, Queen of Diamonds, 10 of Hearts, 2 of Clubs")
+
+template = "$do_cards{'; '}[[$1 of $2$sep]]"
+result= cosmo.f(template){do_cards = cosmo.make_concat(mycards)}
+assert(result=="Ace of Spades; Queen of Diamonds; 10 of Hearts; 2 of Clubs")
+
+template = "$concat{cards, '; '}[[$1 of $2$sep]]"
+result= cosmo.f(template){cards = mycards, concat = cosmo.concat}
+assert(result=="Ace of Spades; Queen of Diamonds; 10 of Hearts; 2 of Clubs")
 
 template = [====[You have: $do_cards[[$rank of $suit]],
 [[, $rank of $suit]],
@@ -456,3 +483,4 @@ result = cosmo.fill(template, { math = math, x = function () return true end, ["
 assert(result == " Hello World! ")
 result = cosmo.f(template){ math = math, x = function () return true end, ["if"] = cosmo.cif }
 assert(result == " Hello World! ")
+

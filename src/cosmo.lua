@@ -240,23 +240,45 @@ function cif(arg, has_block)
   cosmo.yield(arg)
 end
 
-function last(list)
-  return function ()
+function concat(arg)
+  local list, sep = arg[1], arg[2] or ", "
+  local size = #list
+  for i, e in ipairs(list) do
+    if type(e) == "table" then
+      if i ~= size then
+	cosmo.yield(setmetatable({ sep = sep }, { __index = e }))
+      else
+	cosmo.yield(e)
+      end
+    else
+      if i ~= size then
+	cosmo.yield{ it = e, sep = sep }
+      else
+	cosmo.yield{ it = e }
+      end
+    end
+  end
+end
+
+function make_concat(list)
+  return function (arg)
+	   local sep = (arg and arg[1]) or ", "
 	   local size = #list
 	   for i, e in ipairs(list) do
 	     if type(e) == "table" then
-	       if i == size then
-		 cosmo.yield(setmetatable({ _last = true }, { __index = e }))
+	       if i ~= size then
+		 cosmo.yield(setmetatable({ sep = sep }, { __index = e }))
 	       else
-		 cosmo.yield(e)
+		 cosmo.yield(setmetatable({ sep = "" }, { __index = e }))
 	       end
 	     else
-	       if i == size then
-		 cosmo.yield{ it = e, _last = true }
+	       if i ~= size then
+		 cosmo.yield{ it = e, sep = sep }
 	       else
-		 cosmo.yield{ it = e }
+		 cosmo.yield{ it = e, sep = "" }
 	       end
 	     end
 	   end
 	 end
 end
+
