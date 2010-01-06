@@ -49,12 +49,16 @@ local compiled_template = [[
 				  subtemplates[$i] = compile($subtemplate)
 			    ]===]
 			    $if_args[===[
-				  for e in coroutine.wrap(selector), $args, true do
-				     if type(e) ~= "table" then
-					e = { it = tostring(e) }
+				  for e, literal in coroutine.wrap(selector), $args, true do
+				     if literal then
+				       insert(out, tostring(e))
+				     else
+				       if type(e) ~= "table" then
+					 e = { it = tostring(e) }
+				       end
+				       prepare_env(e, env) 
+				       insert(out, (subtemplates[rawget(e, '_template') or 1] or id)(e))
 				     end
-				     prepare_env(e, env) 
-				     insert(out, (subtemplates[rawget(e, '_template') or 1] or id)(e))
 				  end
 			    ]===],
 			    [===[
@@ -67,12 +71,16 @@ local compiled_template = [[
 					insert(out, (subtemplates[rawget(e, '_template') or 1] or id)(e))
 				     end
 				  else
-				     for e in coroutine.wrap(selector), nil, true do
-					if type(e) ~= "table" then
+				     for e, literal in coroutine.wrap(selector), nil, true do
+				       if literal then
+					 insert(out, tostring(e))
+				       else
+					 if type(e) ~= "table" then
 					   e = { it = tostring(e) }
-					end
-					prepare_env(e, env) 
-					insert(out, (subtemplates[rawget(e, '_template') or 1] or id)(e))
+					 end
+					 prepare_env(e, env) 
+					 insert(out, (subtemplates[rawget(e, '_template') or 1] or id)(e))
+				       end
 				     end
 				  end
 			    ]===]

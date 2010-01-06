@@ -82,12 +82,16 @@ local function fill_template_application(state, selector, args, first_subtemplat
    else
       if args and args ~= "" and args ~= "{}" then
 	 args = loadstring("local env = (...); return " .. args)(env)
-	 for e in coroutine.wrap(selector), args, true do
-	    if type(e) ~= "table" then
+	 for e, literal in coroutine.wrap(selector), args, true do
+	   if literal then
+	     insert(out, tostring(e))
+	   else
+	     if type(e) ~= "table" then
 	       e = { it = tostring(e) }
-	    end
-	    prepare_env(e, env) 
-	    insert(out, fill(subtemplates[rawget(e, '_template') or 1] or "", e, fill))
+	     end
+	     prepare_env(e, env) 
+	     insert(out, fill(subtemplates[rawget(e, '_template') or 1] or "", e, fill))
+	   end
 	 end
       else
 	 if type(selector) == 'table' then
@@ -99,12 +103,16 @@ local function fill_template_application(state, selector, args, first_subtemplat
 	       insert(out, fill(subtemplates[rawget(e, '_template') or 1] or "", e, fill))
 	    end
 	 else
-	    for e in coroutine.wrap(selector), nil, true do
-	       if type(e) ~= "table" then
+	    for e, literal in coroutine.wrap(selector), nil, true do
+	      if literal then
+		insert(out, tostring(e))
+	      else
+		if type(e) ~= "table" then
 		  e = { it = tostring(e) }
-	       end
-	       prepare_env(e, env) 
-	       insert(out, fill(subtemplates[rawget(e, '_template') or 1] or "", e, fill))
+		end
+		prepare_env(e, env) 
+		insert(out, fill(subtemplates[rawget(e, '_template') or 1] or "", e, fill))
+	      end
 	    end
 	 end
       end
