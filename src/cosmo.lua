@@ -254,13 +254,15 @@ function concat(arg)
   for i, e in ipairs(list) do
     if type(e) == "table" then
       if i ~= size then
-	cosmo.yield(setmetatable({ sep = sep }, { __index = e }))
+	cosmo.yield(e)
+	cosmo.yield(sep, true)
       else
 	cosmo.yield(e)
       end
     else
       if i ~= size then
-	cosmo.yield{ it = e, sep = sep }
+	cosmo.yield{ it = e }
+	cosmo.yield(sep, true)
       else
 	cosmo.yield{ it = e }
       end
@@ -275,15 +277,17 @@ function make_concat(list)
 	   for i, e in ipairs(list) do
 	     if type(e) == "table" then
 	       if i ~= size then
-		 cosmo.yield(setmetatable({ sep = sep }, { __index = e }))
+		 cosmo.yield(e)
+		 cosmo.yield(sep, true)
 	       else
-		 cosmo.yield(setmetatable({ sep = "" }, { __index = e }))
+		 cosmo.yield(e)
 	       end
 	     else
 	       if i ~= size then
-		 cosmo.yield{ it = e, sep = sep }
+		 cosmo.yield{ it = e }
+		 cosmo.yield(sep, true)
 	       else
-		 cosmo.yield{ it = e, sep = "" }
+		 cosmo.yield{ it = e }
 	       end
 	     end
 	   end
