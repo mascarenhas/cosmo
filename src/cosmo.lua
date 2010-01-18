@@ -16,22 +16,17 @@ local compiled_template = [[
       local setmetatable = setmetatable
       local is_callable = ...
       local function prepare_env(env, parent)
-        local meta = getmetatable(env)
-        if meta and meta.__index then
-          local index = meta.__index
-          meta.__index = function (t, k)
-			   local v
-			   if type(index) == "table" then 
-			     v = index[k] 
-			   else
-			     v = index(t, k)
+	local __index = function (t, k)
+			  local v = env[k]
+			  if not v then
+			    v = parent[k]
+			  end
+			  return v
+			end
+	local __newindex = function (t, k, v)
+			     env[k] = v
 			   end
-                           if not v then v = parent[k] end
-                           return v
-                         end
-        else
-          setmetatable(env, { __index = parent })
-        end
+	return setmetatable({ raw = env }, { __index = __index, __newindex = __newindex })
       end
       local function id() return "" end
       return function (env)
@@ -54,10 +49,11 @@ local compiled_template = [[
 				       insert(out, tostring(e))
 				     else
 				       if type(e) ~= "table" then
-					 e = { it = tostring(e) }
+					 e = prepare_env({ it = tostring(e) }, env)
+				       else
+					 e = prepare_env(e, env)
 				       end
-				       prepare_env(e, env) 
-				       insert(out, (subtemplates[rawget(e, '_template') or 1] or id)(e))
+				       insert(out, (subtemplates[e.raw._template or 1] or id)(e))
 				     end
 				  end
 			    ]===],
@@ -65,10 +61,11 @@ local compiled_template = [[
 				  if type(selector) == 'table' then
 				     for _, e in ipairs(selector) do
 					if type(e) ~= "table" then
-					   e = { it = tostring(e) }
+					  e = prepare_env({ it = tostring(e) }, env)
+					else
+					  e = prepare_env(e, env)
 					end
-					prepare_env(e, env) 
-					insert(out, (subtemplates[rawget(e, '_template') or 1] or id)(e))
+					insert(out, (subtemplates[e.raw._template or 1] or id)(e))
 				     end
 				  else
 				     for e, literal in coroutine.wrap(selector), nil, true do
@@ -76,10 +73,11 @@ local compiled_template = [[
 					 insert(out, tostring(e))
 				       else
 					 if type(e) ~= "table" then
-					   e = { it = tostring(e) }
+					   e = prepare_env({ it = tostring(e) }, env)
+					 else
+					   e = prepare_env(e, env)
 					 end
-					 prepare_env(e, env) 
-					 insert(out, (subtemplates[rawget(e, '_template') or 1] or id)(e))
+					 insert(out, (subtemplates[e.raw._template or 1] or id)(e))
 				       end
 				     end
 				  end

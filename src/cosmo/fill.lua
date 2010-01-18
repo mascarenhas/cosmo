@@ -32,22 +32,17 @@ local function fill_text(state, text)
 end
 
 local function prepare_env(env, parent)
-  local meta = getmetatable(env)
-  if meta and meta.__index then
-    local index = meta.__index
-    meta.__index = function (t, k)
-		     local v
-		     if type(index) == "table" then 
-		       v = index[k] 
-		     else
-		       v = index(t, k)
+  local __index = function (t, k)
+		    local v = env[k]
+		    if not v then
+		      v = parent[k]
+		    end
+		    return v
+		  end
+  local __newindex = function (t, k, v)
+		       env[k] = v
 		     end
-		     if not v then v = parent[k] end
-		     return v
-		   end
-  else
-    setmetatable(env, { __index = parent })
-  end
+  return setmetatable({ raw = env }, { __index = __index, __newindex = __newindex })
 end
 
 local function parse_longstring(s)
@@ -87,20 +82,22 @@ local function fill_template_application(state, selector, args, first_subtemplat
 	     insert(out, tostring(e))
 	   else
 	     if type(e) ~= "table" then
-	       e = { it = tostring(e) }
+	       e = prepare_env({ it = tostring(e) }, env)
+	     else
+	       e = prepare_env(e, env) 
 	     end
-	     prepare_env(e, env) 
-	     insert(out, fill(subtemplates[rawget(e, '_template') or 1] or "", e, fill))
+	     insert(out, fill(subtemplates[e.raw._template or 1] or "", e, fill))
 	   end
 	 end
       else
 	 if type(selector) == 'table' then
 	    for _, e in ipairs(selector) do
 	       if type(e) ~= "table" then
-		  e = { it = tostring(e) }
+		 e = prepare_env({ it = tostring(e) }, env)
+	       else
+		 e = prepare_env(e, env) 
 	       end
-	       prepare_env(e, env) 
-	       insert(out, fill(subtemplates[rawget(e, '_template') or 1] or "", e, fill))
+	       insert(out, fill(subtemplates[e.raw._template or 1] or "", e, fill))
 	    end
 	 else
 	    for e, literal in coroutine.wrap(selector), nil, true do
@@ -108,10 +105,11 @@ local function fill_template_application(state, selector, args, first_subtemplat
 		insert(out, tostring(e))
 	      else
 		if type(e) ~= "table" then
-		  e = { it = tostring(e) }
+		  e = prepare_env({ it = tostring(e) }, env)
+		else
+		  e = prepare_env(e, env)
 		end
-		prepare_env(e, env) 
-		insert(out, fill(subtemplates[rawget(e, '_template') or 1] or "", e, fill))
+		insert(out, fill(subtemplates[e.raw._template or 1] or "", e, fill))
 	      end
 	    end
 	 end
