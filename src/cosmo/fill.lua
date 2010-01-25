@@ -10,26 +10,8 @@ local function is_callable(f)
   return false
 end
 
-local function get_selector(env, selector)
-  selector = string.sub(selector, 2, #selector)
-  local parts = {}
-  for w in string.gmatch(selector, "[^|]+") do
-    local n = tonumber(w)
-    if n then
-       env = env[n]
-    else
-       env = env[w]
-    end
-  end
-  return env
-end
-
 local insert = table.insert
 local concat = table.concat
-
-local function fill_text(state, text)
-  insert(state.out, text)
-end
 
 local function prepare_env(env, parent)
   local __index = function (t, k)
@@ -45,91 +27,84 @@ local function prepare_env(env, parent)
   return setmetatable({ raw = env }, { __index = __index, __newindex = __newindex })
 end
 
-local function parse_longstring(s)
-  local start = s:match("^(%[=*%[)")
-  if start then 
-    return string.format("%q", s:sub(#start + 1, #s - #start))
+local interpreter = {}
+
+function interpreter.text(state, text)
+  assert(text.tag == "text")
+  insert(state.out, text.text)
+end
+
+function interpreter.appl(state, appl)
+  assert(appl.tag == "appl")
+  local selector, args, subtemplates = appl.selector, appl.args, appl.subtemplates
+  local env, out = state.env, state.out
+  selector = loadstring("local env = (...); return " .. selector)(env) or function () return '' end
+  if #subtemplates == 0 then
+    if args and args ~= "" and args ~= "{}" then
+      selector = selector(loadstring("local env = (...); return " .. args)(env), false)
+      insert(out, tostring(selector))
+    else
+      if is_callable(selector) then
+	insert(out, tostring(selector()))
+      else
+	insert(out, tostring(selector))
+      end
+    end
   else
-    return s
+    if args and args ~= "" and args ~= "{}" then
+      args = loadstring("local env = (...); return " .. args)(env)
+      for e, literal in coroutine.wrap(selector), args, true do
+	if literal then
+	  insert(out, tostring(e))
+	else
+	  if type(e) ~= "table" then
+	    e = prepare_env({ it = tostring(e) }, env)
+	  else
+	    e = prepare_env(e, env)
+	  end
+	  interpreter.template({ env = e, out = out }, subtemplates[e.raw._template or 1])
+	end
+      end
+    else
+      if type(selector) == 'table' then
+	for _, e in ipairs(selector) do
+	  if type(e) ~= "table" then
+	    e = prepare_env({ it = tostring(e) }, env)
+	  else
+	    e = prepare_env(e, env) 
+	  end
+	  interpreter.template({ env = e, out = out }, subtemplates[e.raw._template or 1])
+	end
+      else
+	for e, literal in coroutine.wrap(selector), nil, true do
+	  if literal then
+	    insert(out, tostring(e))
+	  else
+	    if type(e) ~= "table" then
+	      e = prepare_env({ it = tostring(e) }, env)
+	    else
+	      e = prepare_env(e, env)
+	    end
+	    interpreter.template({ env = e, out = out }, subtemplates[e.raw._template or 1])
+	  end
+	end
+      end
+    end
   end
 end
 
-local function fill_template_application(state, selector, args, first_subtemplate, 
-					 subtemplates)
-   local fill = state.fill
-   local env, out = state.env, state.out
-   subtemplates = subtemplates or {}
-   if first_subtemplate ~= "" then 
-     table.insert(subtemplates, 1, first_subtemplate) 
-   end
-   selector = loadstring("local env = (...); return " .. selector)(env) or function () return '' end
-   if #subtemplates == 0 then
-      if args and args ~= "" and args ~= "{}" then
-	 selector = selector(loadstring("local env = (...); return " .. args)(env), false)
-	 insert(out, tostring(selector))
-      else
-	 if is_callable(selector) then
-	    insert(out, tostring(selector()))
-	 else
-	    insert(out, tostring(selector))
-	 end
-      end
-   else
-      if args and args ~= "" and args ~= "{}" then
-	 args = loadstring("local env = (...); return " .. args)(env)
-	 for e, literal in coroutine.wrap(selector), args, true do
-	   if literal then
-	     insert(out, tostring(e))
-	   else
-	     if type(e) ~= "table" then
-	       e = prepare_env({ it = tostring(e) }, env)
-	     else
-	       e = prepare_env(e, env) 
-	     end
-	     insert(out, fill(subtemplates[e.raw._template or 1] or "", e, fill))
-	   end
-	 end
-      else
-	 if type(selector) == 'table' then
-	    for _, e in ipairs(selector) do
-	       if type(e) ~= "table" then
-		 e = prepare_env({ it = tostring(e) }, env)
-	       else
-		 e = prepare_env(e, env) 
-	       end
-	       insert(out, fill(subtemplates[e.raw._template or 1] or "", e, fill))
-	    end
-	 else
-	    for e, literal in coroutine.wrap(selector), nil, true do
-	      if literal then
-		insert(out, tostring(e))
-	      else
-		if type(e) ~= "table" then
-		  e = prepare_env({ it = tostring(e) }, env)
-		else
-		  e = prepare_env(e, env)
-		end
-		insert(out, fill(subtemplates[e.raw._template or 1] or "", e, fill))
-	      end
-	    end
-	 end
-      end
-   end
+function interpreter.template(state, template)
+  if template then
+    assert(template.tag == "template")
+    for _, part in ipairs(template.parts) do
+      interpreter[part.tag](state, part)
+    end
+  end
 end
 
-local function fill_template(state, compiled_parts)
-   return concat(state.out)
-end
-
-local interpreter = grammar.cosmo_compiler{ text = fill_text,
-   template_application = fill_template_application, 
-   template = fill_template }
-
-function fill(template, env, subtemplate_fill)
-   subtemplate_fill = subtemplate_fill or fill
-   local start = template:match("^(%[=*%[)")
-   if start then template = template:sub(#start + 1, #template - #start) end
+function fill(template, env)
    local out = {}
    if type(env) == "string" then env = { it = env } end
-   return interpreter:match(template, 1, { env = env, out = out, fill = subtemplate_fill })
+   interpreter.template({ env = env, out = out }, grammar.ast:match(template, 1, {}))
+   return concat(out)
 end

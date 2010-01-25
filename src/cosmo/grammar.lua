@@ -41,8 +41,6 @@ local longstring2 = lpeg.P(function (s, i)
   return lpeg.match(p, s, l)
 end)
 
---longstring = #("[" * lpeg.S"[=") * longstring
-
 local longstring = #("[" * lpeg.S"[=") * (longstring1 + longstring2)
 
 local function parse_longstring(s)
@@ -77,7 +75,7 @@ local syntax = [[
   selector <- ('$(' %s {~ <exp> ~} %s ')') -> parseexp / 
               ('$' %alphanum+ ('|' %alphanum+)*) -> parseselector
   templateappl <- (%state {~ <selector> ~} {~ <args>? ~} !'{' 
-		   ({%longstring?}) (%s ','? %s ({%longstring}))* -> {} !(','? %s %start)) 
+		   ({%longstring} -> compilesubtemplate)? (%s ','? %s ({%longstring} -> compilesubtemplate))* -> {} !(','? %s %start)) 
 		     -> compileapplication
   args <- '{' %s '}' / '{' %s <arg> %s (',' %s <arg> %s)* ','? %s '}'
   arg <- <attr> / <exp>
@@ -108,6 +106,28 @@ local function pos_to_line(str, pos)
   return line, pos - start
 end
 
+local function ast_text(state, text)
+  return { tag = "text", text = text }
+end
+
+local function ast_template_application(state, selector, args, ast_first_subtemplate, ast_subtemplates)
+  if not ast_subtemplates then
+    ast_first_subtemplate = nil
+  end
+  local subtemplates = { ast_first_subtemplate, unpack(ast_subtemplates or {}) }
+  return { tag = "appl", selector = selector, args = args, subtemplates = subtemplates }
+end
+
+local function ast_template(state, parts)
+  return { tag = "template", parts = parts }
+end
+
+local function ast_subtemplate(text)
+  local start = text:match("^(%[=*%[)")
+  if start then text = text:sub(#start + 1, #text - #start) end
+  return _M.ast:match(text, 1, {})
+end
+
 local syntax_defs = {
   start = start_ls,
   alpha = alpha,
@@ -125,12 +145,11 @@ local syntax_defs = {
   error = function (tmpl, pos)
     	        local line, pos = pos_to_line(tmpl, pos)
 		error("syntax error in template at line " .. line .. " position " .. pos)
-	      end
+	      end,
+  compiletemplate = ast_template,
+  compiletext = ast_text,
+  compileapplication = ast_template_application,
+  compilesubtemplate = ast_subtemplate
 }
 
-function cosmo_compiler(compiler_funcs)
-   syntax_defs.compiletemplate = compiler_funcs.template
-   syntax_defs.compiletext = compiler_funcs.text
-   syntax_defs.compileapplication = compiler_funcs.template_application
-   return re.compile(syntax, syntax_defs)
-end
+ast = re.compile(syntax, syntax_defs)
