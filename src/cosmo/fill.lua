@@ -102,9 +102,10 @@ function interpreter.template(state, template)
   end
 end
 
-function fill(template, env)
-   local out = {}
+function fill(template, env, opts)
+   opts = opts or {}
+   local out = opts.out or {}
    if type(env) == "string" then env = { it = env } end
    interpreter.template({ env = env, out = out }, grammar.ast:match(template))
-   return concat(out)
+   return concat(out, opts.delim)
 end
