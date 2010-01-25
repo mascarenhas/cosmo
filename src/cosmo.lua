@@ -177,7 +177,7 @@ function compile(template, chunkname)
   chunkname = chunkname or template
   local compiled_template = cache[template][chunkname]
   if not compiled_template then
-    compiled_template = compile_template(chunkname, compiler.template(grammar.ast:match(template, 1, {})))
+    compiled_template = compile_template(chunkname, compiler.template(grammar.ast:match(template)))
     cache[template][chunkname] = compiled_template
   end
   return compiled_template

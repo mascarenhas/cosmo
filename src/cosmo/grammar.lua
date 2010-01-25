@@ -20,7 +20,6 @@ local function parse_selector(selector, env)
 end
 
 local function parse_exp(exp)
---  return exp:sub(2, #exp - 1)
   return exp
 end
 
@@ -69,12 +68,12 @@ local shortstring = (lpeg.P'"' * ( (lpeg.P'\\' * 1) + (1 - (lpeg.S'"\n\r\f')) )^
 local space = (lpeg.S'\n \t\r\f')^0
  
 local syntax = [[
-  template <- (%state <item>* -> {} !.) -> compiletemplate
+  template <- (<item>* -> {} !.) -> compiletemplate
   item <- <text> / <templateappl> / (. => error)
-  text <- (%state {~ (!<selector> ('$$' -> '$' / .))+ ~}) -> compiletext
+  text <- ({~ (!<selector> ('$$' -> '$' / .))+ ~}) -> compiletext
   selector <- ('$(' %s {~ <exp> ~} %s ')') -> parseexp / 
               ('$' %alphanum+ ('|' %alphanum+)*) -> parseselector
-  templateappl <- (%state {~ <selector> ~} {~ <args>? ~} !'{' 
+  templateappl <- ({~ <selector> ~} {~ <args>? ~} !'{' 
 		   ({%longstring} -> compilesubtemplate)? (%s ','? %s ({%longstring} -> compilesubtemplate))* -> {} !(','? %s %start)) 
 		     -> compileapplication
   args <- '{' %s '}' / '{' %s <arg> %s (',' %s <arg> %s)* ','? %s '}'
@@ -106,11 +105,11 @@ local function pos_to_line(str, pos)
   return line, pos - start
 end
 
-local function ast_text(state, text)
+local function ast_text(text)
   return { tag = "text", text = text }
 end
 
-local function ast_template_application(state, selector, args, ast_first_subtemplate, ast_subtemplates)
+local function ast_template_application(selector, args, ast_first_subtemplate, ast_subtemplates)
   if not ast_subtemplates then
     ast_first_subtemplate = nil
   end
@@ -118,14 +117,14 @@ local function ast_template_application(state, selector, args, ast_first_subtemp
   return { tag = "appl", selector = selector, args = args, subtemplates = subtemplates }
 end
 
-local function ast_template(state, parts)
+local function ast_template(parts)
   return { tag = "template", parts = parts }
 end
 
 local function ast_subtemplate(text)
   local start = text:match("^(%[=*%[)")
   if start then text = text:sub(#start + 1, #text - #start) end
-  return _M.ast:match(text, 1, {})
+  return _M.ast:match(text)
 end
 
 local syntax_defs = {
@@ -141,7 +140,6 @@ local syntax_defs = {
   parseexp = parse_exp,
   parsels = parse_longstring,
   addenv = function (s) return "env['" .. s .. "']" end,
-  state = lpeg.Carg(1),
   error = function (tmpl, pos)
     	        local line, pos = pos_to_line(tmpl, pos)
 		error("syntax error in template at line " .. line .. " position " .. pos)

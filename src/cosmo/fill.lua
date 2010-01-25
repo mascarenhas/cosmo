@@ -105,6 +105,6 @@ end
 function fill(template, env)
    local out = {}
    if type(env) == "string" then env = { it = env } end
-   interpreter.template({ env = env, out = out }, grammar.ast:match(template, 1, {}))
+   interpreter.template({ env = env, out = out }, grammar.ast:match(template))
    return concat(out)
 end
