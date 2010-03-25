@@ -9,7 +9,7 @@ module(..., package.seeall)
 yield = coroutine.yield
 
 local preamble = [[
-    local is_callable, insert, concat, setmetatable, getmetatable, type, wrap, tostring = ...
+    local is_callable, insert, concat, setmetatable, getmetatable, type, wrap, tostring, check_selector = ...
     local function prepare_env(env, parent)
       local __index = function (t, k)
 			local v = env[k]
@@ -21,7 +21,7 @@ local preamble = [[
       local __newindex = function (t, k, v)
 			   env[k] = v
 			 end
-      return setmetatable({ raw = env }, { __index = __index, __newindex = __newindex })
+      return setmetatable({ self = env }, { __index = __index, __newindex = __newindex })
     end
     local id = function () end
     local template_func = %s
@@ -40,14 +40,15 @@ local compiled_template = [[
 	  insert(out, $quoted_text)
       ]=],
       [=[
+	  local selector_name = "$selector"
 	  local selector = $parsed_selector
-	  if not selector then selector = '' end
 	  $if_subtemplate[==[
 	      local subtemplates = {}
 	      $subtemplates[===[
 		  subtemplates[$i] = $subtemplate
 	      ]===]
 	      $if_args[===[
+		  check_selector(selector_name, selector)
 		  for e, literal in wrap(selector), $args, true do
 		    if literal then
 		      insert(out, tostring(e))
@@ -57,7 +58,7 @@ local compiled_template = [[
 		      else
 			e = prepare_env(e, env)
 		      end
-		      (subtemplates[e.raw._template or 1] or id)(out, e)
+		      (subtemplates[e.self._template or 1] or id)(out, e)
 		    end
 		  end
 	      ]===],
@@ -69,9 +70,10 @@ local compiled_template = [[
 		      else
 			e = prepare_env(e, env)
 		      end
-		      (subtemplates[e.raw._template or 1] or id)(out, e)
+		      (subtemplates[e.self._template or 1] or id)(out, e)
 		    end
 		  else
+		    check_selector(selector_name, selector)
 		    for e, literal in wrap(selector), nil, true do
 		      if literal then
 			insert(out, tostring(e))
@@ -81,7 +83,7 @@ local compiled_template = [[
 			else
 			  e = prepare_env(e, env)
 			end
-			(subtemplates[e.raw._template or 1] or id)(out, e)
+			(subtemplates[e.self._template or 1] or id)(out, e)
 		      end
 		    end
 		  end
@@ -89,6 +91,7 @@ local compiled_template = [[
 	  ]==],
 	  [==[
 	      $if_args[===[
+		  check_selector(selector_name, selector)
 		  selector = selector($args, false)
 		  insert(out, tostring(selector))
 	      ]===],
@@ -96,7 +99,7 @@ local compiled_template = [[
 		  if is_callable(selector) then
 		    insert(out, tostring(selector()))
 		  else
-		    insert(out, tostring(selector))
+		    insert(out, tostring(selector or ""))
 		  end
 	      ]===]
 	  ]==]
@@ -111,12 +114,19 @@ local function is_callable(f)
   return false
 end
 
+local function check_selector(name, selector)
+  if not is_callable(selector) then
+    error("selector " .. name .. " is not callable but is " .. type(selector))
+  end
+end
+
 local function compile_template(chunkname, template_code)
    local template_func, err = loadstring(string.format(preamble, template_code), chunkname)
    if not template_func then
      error("syntax error when compiling template: " .. err)
    else
-     return template_func(is_callable, table.insert, table.concat, setmetatable, getmetatable, type, coroutine.wrap, tostring)
+     return template_func(is_callable, table.insert, table.concat, setmetatable, getmetatable, type,
+			  coroutine.wrap, tostring, check_selector)
    end
 end
 
@@ -289,3 +299,19 @@ function make_concat(list)
 	 end
 end
 
+function cfor(args)
+  local name, list, args = args[1], args[2], args[3]
+  if type(list) == "table" then
+    for i, item in ipairs(list) do
+      cosmo.yield({ [name] = item, i = i })
+    end
+  else
+    for item, literal in coroutine.wrap(list), args, true do
+      if literal then
+	cosmo.yield(item, true)
+      else
+	cosmo.yield({ [name] = item })
+      end
+    end
+  end
+end
