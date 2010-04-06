@@ -40,7 +40,7 @@ local compiled_template = [[
 	  insert(out, $quoted_text)
       ]=],
       [=[
-	  local selector_name = "$selector"
+	  local selector_name = $selector
 	  local selector = $parsed_selector
 	  $if_subtemplate[==[
 	      local subtemplates = {}
@@ -149,7 +149,7 @@ end
 function compiler.appl(appl)
   assert(appl.tag == "appl")
   local selector, args, subtemplates = appl.selector, appl.args, appl.subtemplates
-   local ta = { _template = 2, selector = selector, 
+  local ta = { _template = 2, selector = string.format("%q", selector), 
       parsed_selector = selector }
    local do_subtemplates = function ()
 			     for i, subtemplate in ipairs(subtemplates) do
