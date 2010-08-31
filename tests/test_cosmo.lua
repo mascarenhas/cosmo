@@ -532,3 +532,20 @@ result = cosmo.fill(template, { lit = function ()
 				      end })
 assert(result == "Hello World!")
 						    
+template = "$if{ math.fmod(x, 4) == 0, target = 'World' }[[ Hello $target! ]]"
+result = cosmo.fill(template, { math = math, x = 2, ["if"] = cosmo.cif }, { fallback = true })
+assert(result == " Hello World! ")
+result = cosmo.f(template)({ math = math, x = 2, ["if"] = cosmo.cif }, { fallback = true })
+assert(result == " Hello World! ")
+
+template = " $foo "
+result = cosmo.fill(template, {})
+assert(result == "  ")
+result = cosmo.f(template){}
+assert(result == "  ")
+
+template = " $bar "
+result = cosmo.fill(template, {}, { passthrough = true })
+assert(result == " $bar ")
+result = cosmo.f(template)({}, { passthrough = true })
+assert(result == " $bar ")

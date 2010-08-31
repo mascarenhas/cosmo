@@ -10,6 +10,11 @@ yield = coroutine.yield
 
 local preamble = [[
     local is_callable, insert, concat, setmetatable, getmetatable, type, wrap, tostring, check_selector = ...
+    local function unparse_name(parsed_selector)
+      local name = parsed_selector:match("^env%%['([%%w_]+)'%%]$")
+      if name then name = "$" .. name end
+      return name or parsed_selector
+    end
     local function prepare_env(env, parent)
       local __index = function (t, k)
 			local v = env[k]
@@ -28,25 +33,29 @@ local preamble = [[
     return function (env, opts) 
 	     opts = opts or {}
 	     local out = opts.out or {}
-	     template_func(out, env)
+	     template_func(out, env, opts)
 	     return concat(out, opts.delim)
 	   end
 ]]
 
 local compiled_template = [[
-    function (out, env)
+    function (out, env, opts)
       if type(env) == "string" then env = { it = env } end
       $parts[=[
 	  insert(out, $quoted_text)
       ]=],
       [=[
-	  local selector_name = $selector
+	  local selector_name = unparse_name($selector)
 	  local selector = $parsed_selector
 	  $if_subtemplate[==[
 	      local subtemplates = {}
 	      $subtemplates[===[
 		  subtemplates[$i] = $subtemplate
 	      ]===]
+              local default = id
+	      if opts.fallback then
+		default = subtemplates[1]
+	      end
 	      $if_args[===[
 		  check_selector(selector_name, selector)
 		  for e, literal in wrap(selector), $args, true do
@@ -58,7 +67,7 @@ local compiled_template = [[
 		      else
 			e = prepare_env(e, env)
 		      end
-		      (subtemplates[e.self._template or 1] or id)(out, e)
+		      (subtemplates[e.self._template or 1] or default)(out, e, opts)
 		    end
 		  end
 	      ]===],
@@ -70,7 +79,7 @@ local compiled_template = [[
 		      else
 			e = prepare_env(e, env)
 		      end
-		      (subtemplates[e.self._template or 1] or id)(out, e)
+		      (subtemplates[e.self._template or 1] or default)(out, e, opts)
 		    end
 		  else
 		    check_selector(selector_name, selector)
@@ -83,7 +92,7 @@ local compiled_template = [[
 			else
 			  e = prepare_env(e, env)
 			end
-			(subtemplates[e.self._template or 1] or id)(out, e)
+			(subtemplates[e.self._template or 1] or default)(out, e, opts)
 		      end
 		    end
 		  end
@@ -99,6 +108,9 @@ local compiled_template = [[
 		  if is_callable(selector) then
 		    insert(out, tostring(selector()))
 		  else
+		    if not selector and opts.passthrough then
+		      selector = selector_name
+		    end
 		    insert(out, tostring(selector or ""))
 		  end
 	      ]===]
