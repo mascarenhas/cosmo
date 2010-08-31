@@ -1,4 +1,5 @@
 local cosmo = require"cosmo"
+local grammar = require"cosmo.grammar"
 
 values = { rank="Ace", suit="Spades" } 
 template = "$rank of $suit"
@@ -231,6 +232,11 @@ assert(result==" Hello World! ")
 
 template = " $(foo.bar) $(foo[1].baz) "
 result = cosmo.fill(template, { foo = { { baz = "World!" }, bar = "Hello" } })
+assert(result==" Hello World! ")
+
+template = " $[foo.bar] $[foo[1].baz] "
+result = cosmo.fill(template, { foo = { { baz = "World!" }, bar = "Hello" } },
+  { parser = grammar.new("[", "]") })
 assert(result==" Hello World! ")
 
 template = " $(foo.bar) $(foo[1].baz) "

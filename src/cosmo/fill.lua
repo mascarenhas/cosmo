@@ -115,6 +115,7 @@ end
 function fill(template, env, opts)
    opts = opts or {}
    local out = opts.out or {}
+   grammar.ast = opts.parser or grammar.default
    if type(env) == "string" then env = { it = env } end
    interpreter.template({ env = env, out = out }, grammar.ast:match(template))
    return concat(out, opts.delim)

@@ -182,10 +182,12 @@ setmetatable(cache, { __index = function (tab, key)
 				end,
 		      __mode = "v" })
 
-function compile(template, chunkname)
+function compile(template, chunkname, opts)
+  opts = opts or {}
   template = template or ""
   chunkname = chunkname or template
   local compiled_template = cache[template][chunkname]
+  grammar.ast = opts.parser or grammar.default
   if not compiled_template then
     compiled_template = compile_template(chunkname, compiler.template(grammar.ast:match(template)))
     cache[template][chunkname] = compiled_template
@@ -194,16 +196,18 @@ function compile(template, chunkname)
 end
 
 local filled_templates = {}
+setmetatable(filled_templates, { __mode = "k" })
 
-function fill(template, env)
+function fill(template, env, opts)
+   opts = opts or {}
    template = template or ""
    local start = template:match("^(%[=*%[)")
    if start then template = template:sub(#start + 1, #template - #start) end
    if filled_templates[template] then 
-      return compile(template)(env)
+      return compile(template, opts.chunkname, opts.parser)(env, opts)
    else
       filled_templates[template] = true
-      return interpreter.fill(template, env)
+      return interpreter.fill(template, env, opts)
    end
 end
 
