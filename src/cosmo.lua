@@ -4,7 +4,12 @@ local grammar = require "cosmo.grammar"
 local interpreter = require "cosmo.fill"
 local loadstring = loadstring
 
-_ENV = setmetatable({}, { __index = _G })
+if _VERSION == "Lua 5.2" then
+  _ENV = setmetatable({}, { __index = _G })
+else
+  module(..., package.seeall)
+  _ENV = _M
+end
 
 yield = coroutine.yield
 

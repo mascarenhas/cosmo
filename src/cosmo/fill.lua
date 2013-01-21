@@ -1,7 +1,12 @@
 
 local grammar = require "cosmo.grammar"
 
-_ENV = setmetatable({}, { __index = _G })
+if _VERSION == "Lua 5.2" then
+  _ENV = setmetatable({}, { __index = _G })
+else
+  module(..., package.seeall)
+  _ENV = _M
+end
 
 local function is_callable(f)
   if type(f) == "function" then return true end

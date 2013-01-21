@@ -2,7 +2,12 @@
 local lpeg = require "lpeg"
 local re = require "re"
 
-_ENV = setmetatable({}, { __index = _G })
+if _VERSION == "Lua 5.2" then
+  _ENV = setmetatable({}, { __index = _G })
+else
+  module(..., package.seeall)
+  _ENV = _M
+end
 
 local function parse_selector(selector, env)
   env = env or "env"
