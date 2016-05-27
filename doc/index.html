@@ -16,7 +16,7 @@
   <style type="text/css"></p>
 <pre><code>body { color:#000; background:#fff; }
 #header { width:100%;
-   text-align:center;  
+   text-align:center;
    border-top:solid #aaa 1px;
    border-bottom:solid #aaa 1px;
 }
@@ -50,13 +50,14 @@ code in the templates.</p>
 
 <h1><a name="Overview"></a>Installation</h1>
 
-<p>The current version of Cosmo is 14.03.04. This release fixes a bug with the latest version of LPEG.</p>
+<p>The current version of Cosmo is 16.05.27. This release adds support for Lua 5.3.</p>
 
-<p>The previous version, 13.01.30, added support for Lua 5.2. Version 10.04.06 added
-expressions to selectors $(\<exp\>), 
-allowed nested [[ ]] in templates, made commas between subtemplates 
-optional, and added a second parameter to cosmo.yield that tells Cosmo 
-the first parameter is a literal to be included in the expansion instead 
+<p>The previous version, 14.03.04 fixes a bug with the latest version of LPEG.
+Version 13.01.30, added support for Lua 5.2. Version 10.04.06 added
+expressions to selectors $(\<exp\>),
+allowed nested [[ ]] in templates, made commas between subtemplates
+optional, and added a second parameter to cosmo.yield that tells Cosmo
+the first parameter is a literal to be included in the expansion instead
 of an environment.</p>
 
 <p>Cosmo is installed as a rock. To install the most recent release
@@ -70,7 +71,7 @@ repository. Installation on UNIX-based systems need the gcc toolchain.</p>
 <p>Let's start with a simple example of filling a set of scalar values
 into a template: Here are a few examples of Cosmo in use:</p>
 
-<pre><code>&gt; values = { rank="Ace", suit="Spades" } 
+<pre><code>&gt; values = { rank="Ace", suit="Spades" }
 &gt; template = "$rank of $suit"
 &gt; require("cosmo")
 &gt; = cosmo.fill(template, values)
@@ -89,7 +90,7 @@ will get replaced by <code>value.suit</code> ("Spades").</p>
 - and returns a function that then takes the second parameter.  This
 allows for a more compact notation:</p>
 
-<pre><code>&gt; = cosmo.f(template){ rank="Ace", suit="Spades" } 
+<pre><code>&gt; = cosmo.f(template){ rank="Ace", suit="Spades" }
 Ace of Spades
 </code></pre>
 
@@ -134,9 +135,9 @@ Ace of Spades
 <p>Now, suppose we have not just one card, but several.  Cosmo allows us
 to handle this case with "subtemplates"</p>
 
-<pre><code>&gt; mycards = { {rank="Ace", suit="Spades"}, {rank="Queen", suit="Diamonds"}, {rank="10", suit="Hearts"} } 
+<pre><code>&gt; mycards = { {rank="Ace", suit="Spades"}, {rank="Queen", suit="Diamonds"}, {rank="10", suit="Hearts"} }
 &gt; template = "$do_cards[[$rank of $suit, ]]"
-&gt; = cosmo.fill(template, {do_cards = mycards})  
+&gt; = cosmo.fill(template, {do_cards = mycards})
 Ace of Spades, Queen of Diamonds, 10 of Hearts,
 </code></pre>
 
@@ -144,7 +145,7 @@ Ace of Spades, Queen of Diamonds, 10 of Hearts,
 <code>[=[...]=]</code>, <code>[==[...]==]</code>, etc. - just like Lua's long-quoted
 strings.  Again, we can use the shortcut <code>f()</code>:</p>
 
-<pre><code>&gt; = cosmo.f(template){do_cards = mycards}  
+<pre><code>&gt; = cosmo.f(template){do_cards = mycards}
 Ace of Spades, Queen of Diamonds, 10 of Hearts,
 </code></pre>
 
@@ -259,7 +260,7 @@ of sets of cards:</p>
                       cosmo.yield{rank=v[1], suit=v[2], _template=t}
                    end
                 end
-             }         
+             }
          end
       end
     }
@@ -283,12 +284,12 @@ João has Ace of Diamonds
                       cosmo.yield{rank=v[1], suit=v[2]}
                    end
                 end,
-             }         
+             }
           end
        end
     }
 
-Ace of Spades (John), Queen of Diamonds (John), 10 of Hearts (John), 2 of Clubs (John), Ace of Diamonds (João), 
+Ace of Spades (John), Queen of Diamonds (John), 10 of Hearts (John), 2 of Clubs (John), Ace of Diamonds (João),
 </code></pre>
 
 <p>Note that in this case the field "player" is set in the table of
@@ -317,13 +318,13 @@ pass to the subtemplates.</p>
                 plural = #cards[p] &gt; 1,
                 more = #cards[p] &lt; 3,
                 n_more = 3 - #cards[p]
-             }         
+             }
           end
        end
     }
 
 John: 4 cards (no more needed)
-João: 1 card (needs 2 more)   
+João: 1 card (needs 2 more)
 </code></pre>
 
 <p>The conditional above is already present in Cosmo as <code>cosmo.cif</code>. Expressions in arguments
@@ -352,7 +353,7 @@ common case, cosmo provides a function for it:</p>
                 n = #cards[p],
                 if_plural = cosmo.cond(#cards[p] &gt; 1, {}),
                 if_needs_more = cosmo.cond(#cards[p] &lt; 3, { n = 3 - #cards[p] })
-             }         
+             }
           end
        end
     }
@@ -372,7 +373,7 @@ one parameter (the template) and returns a function:</p>
                 n = #cards[p],
                 if_plural = cosmo.c(#cards[p] &gt; 1){},
                 if_needs_more = cosmo.c(#cards[p] &lt; 3){ n = 3-#cards[p] }
-             }         
+             }
           end
        end
     }
@@ -451,7 +452,7 @@ last, yields the literal <em>delim</em> or ", " is <em>delim</em> is <code>nil</
 
 <h1><a name="Contact"></a> Contact Us</h1>
 
-<p>For more information please contact one of the authors, 
+<p>For more information please contact one of the authors,
 <a href="mailto:mascarenhas_no_spam@acm.org">Fabio Mascarenhas</a> and <a href="http://takhteyev.org/contact/">Yuri
 Takhteyev</a>, or write to the
 <a href="http://sputnik.freewisdom.org/en/Mailing_List">Sputnik Mailing List</a>.</p>

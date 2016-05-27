@@ -1,8 +1,9 @@
 
 local lpeg = require "lpeg"
 local re = require "re"
+local unpack = table.unpack or unpack
 
-if _VERSION == "Lua 5.2" then
+if _VERSION ~= "Lua 5.1" then
   _ENV = setmetatable({}, { __index = _G })
 else
   module(..., package.seeall)
