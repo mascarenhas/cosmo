@@ -26,7 +26,7 @@
    <a href="#Using">Using Cosmo</a> &middot;
    <a href="#Reference">API Reference</a> &middot;
    <a href="#Contact">Contact Us</a> &middot;
-   <a href="#License">License</a> 
+   <a href="#License">License</a>
 
   </p>
  </div>
@@ -42,13 +42,15 @@ code in the templates.
 <a name="Overview"></a>Installation
 =================================================
 
-The current version of Cosmo is 14.03.04. This release fixes a bug with the latest version of LPEG.
+The current version of Cosmo is 16.06.04. This release adds support
+for Lua 5.3.
 
-The previous version, 13.01.30, added support for Lua 5.2. Version 10.04.06 added
-expressions to selectors $(\<exp\>), 
-allowed nested \[\[ \]\] in templates, made commas between subtemplates 
-optional, and added a second parameter to cosmo.yield that tells Cosmo 
-the first parameter is a literal to be included in the expansion instead 
+The previous version, 14.03.04, fixed a bug uncovered by a new version of LPEG.
+Version 13.01.30 added support for Lua 5.2. Version 10.04.06 added
+expressions to selectors $(\<exp\>),
+allowed nested \[\[ \]\] in templates, made commas between subtemplates
+optional, and added a second parameter to cosmo.yield that tells Cosmo
+the first parameter is a literal to be included in the expansion instead
 of an environment.
 
 Cosmo is installed as a rock. To install the most recent release
@@ -63,7 +65,7 @@ repository. Installation on UNIX-based systems need the gcc toolchain.
 Let's start with a simple example of filling a set of scalar values
 into a template: Here are a few examples of Cosmo in use:
 
-    > values = { rank="Ace", suit="Spades" } 
+    > values = { rank="Ace", suit="Spades" }
     > template = "$rank of $suit"
     > require("cosmo")
     > = cosmo.fill(template, values)
@@ -81,7 +83,7 @@ will get replaced by `value.suit` ("Spades").
 - and returns a function that then takes the second parameter.  This
 allows for a more compact notation:
 
-    > = cosmo.f(template){ rank="Ace", suit="Spades" } 
+    > = cosmo.f(template){ rank="Ace", suit="Spades" }
     Ace of Spades
 
 A selector can be either a string or a Lua expression in parenthesis,
@@ -123,7 +125,7 @@ the function returns. For example:
 Now, suppose we have not just one card, but several.  Cosmo allows us
 to handle this case with "subtemplates"
 
-    > mycards = { {rank="Ace", suit="Spades"}, {rank="Queen", suit="Diamonds"}, {rank="10", suit="Hearts"} } 
+    > mycards = { {rank="Ace", suit="Spades"}, {rank="Queen", suit="Diamonds"}, {rank="10", suit="Hearts"} }
     > template = "$do_cards[[$rank of $suit, ]]"
     > = cosmo.fill(template, {do_cards = mycards})  
     Ace of Spades, Queen of Diamonds, 10 of Hearts,
@@ -219,7 +221,7 @@ the last item is preceeded by an extra "and".
 Templates and subtemplates can be nested to arbitrary depth.  For
 instance, instead of formatting a set of cards, we can format a list
 of sets of cards:
-   
+
     > players = {"John", "João"}
     > cards = {}
     > cards["John"] = mycards
@@ -270,7 +272,7 @@ Subtemplates can see values that were set in the higher scope:
            end
         }
 
-    Ace of Spades (John), Queen of Diamonds (John), 10 of Hearts (John), 2 of Clubs (John), Ace of Diamonds (João), 
+    Ace of Spades (John), Queen of Diamonds (John), 10 of Hearts (John), 2 of Clubs (John), Ace of Diamonds (João),
 
 Note that in this case the field "player" is set in the table of
 values that is passed to `do_players`, but is used one level deeper -
@@ -428,12 +430,12 @@ last, yields the literal *delim* or ", " is *delim* is `nil`
 <a name="Contact"></a> Contact Us
 =================================================
 
-For more information please contact one of the authors, 
+For more information please contact one of the authors,
 [Fabio Mascarenhas](mailto:mascarenhas_no_spam@acm.org) and [Yuri
 Takhteyev](http://takhteyev.org/contact/), or write to the
 [Sputnik Mailing List](http://sputnik.freewisdom.org/en/Mailing_List).
 
-Comments are welcome! 
+Comments are welcome!
 
 <a name="License"></a> License
 =================================================

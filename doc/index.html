@@ -1,30 +1,20 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html>
-<head>
-	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
-	<title><a name="Overview"></a> Overview</title>
-	<link rel="stylesheet" type="text/css" href="default.css" />
-</head>
-<body>
-
 <p><html>
  <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
   <meta name="description" content="Cosmo: Safe Templates in Lua">
   <meta name="keywords" content="Lua, Cosmo, safe templates">
   <title>Cosmo</title>
-  <style type="text/css"></p>
-<pre><code>body { color:#000; background:#fff; }
-#header { width:100%;
-   text-align:center;
-   border-top:solid #aaa 1px;
-   border-bottom:solid #aaa 1px;
-}
-#header p { margin-left:0; }
-p { margin-left:3px; }
-pre { background-color:#ffe; white-space:pre; padding-left:3ex; border-left: 1px solid gray; margin-left: 10px}
-</code></pre>
-<p>  </style>
+  <style type="text/css">
+    body { color:#000; background:#fff; }
+    #header { width:100%;
+       text-align:center; <br />
+       border-top:solid #aaa 1px;
+       border-bottom:solid #aaa 1px;
+    }
+    #header p { margin-left:0; }
+    p { margin-left:3px; }
+    pre { background-color:#ffe; white-space:pre; padding-left:3ex; border-left: 1px solid gray; margin-left: 10px}
+  </style>
 </head>
 <body>
  <div id="header">
@@ -36,9 +26,9 @@ pre { background-color:#ffe; white-space:pre; padding-left:3ex; border-left: 1px
    <a href="#Using">Using Cosmo</a> &middot;
    <a href="#Reference">API Reference</a> &middot;
    <a href="#Contact">Contact Us</a> &middot;
-   <a href="#License">License</a> </p>
+   <a href="#License">License</a></p>
 
-<p>  </p>
+<p></p>
  </div></p>
 
 <h1><a name="Overview"></a> Overview</h1>
@@ -50,10 +40,11 @@ code in the templates.</p>
 
 <h1><a name="Overview"></a>Installation</h1>
 
-<p>The current version of Cosmo is 16.05.27. This release adds support for Lua 5.3.</p>
+<p>The current version of Cosmo is 16.06.04. This release adds support
+for Lua 5.3.</p>
 
-<p>The previous version, 14.03.04 fixes a bug with the latest version of LPEG.
-Version 13.01.30, added support for Lua 5.2. Version 10.04.06 added
+<p>The previous version, 14.03.04, fixed a bug uncovered by a new version of LPEG.
+Version 13.01.30 added support for Lua 5.2. Version 10.04.06 added
 expressions to selectors $(\<exp\>),
 allowed nested [[ ]] in templates, made commas between subtemplates
 optional, and added a second parameter to cosmo.yield that tells Cosmo
@@ -137,7 +128,7 @@ to handle this case with "subtemplates"</p>
 
 <pre><code>&gt; mycards = { {rank="Ace", suit="Spades"}, {rank="Queen", suit="Diamonds"}, {rank="10", suit="Hearts"} }
 &gt; template = "$do_cards[[$rank of $suit, ]]"
-&gt; = cosmo.fill(template, {do_cards = mycards})
+&gt; = cosmo.fill(template, {do_cards = mycards})  
 Ace of Spades, Queen of Diamonds, 10 of Hearts,
 </code></pre>
 
@@ -145,7 +136,7 @@ Ace of Spades, Queen of Diamonds, 10 of Hearts,
 <code>[=[...]=]</code>, <code>[==[...]==]</code>, etc. - just like Lua's long-quoted
 strings.  Again, we can use the shortcut <code>f()</code>:</p>
 
-<pre><code>&gt; = cosmo.f(template){do_cards = mycards}
+<pre><code>&gt; = cosmo.f(template){do_cards = mycards}  
 Ace of Spades, Queen of Diamonds, 10 of Hearts,
 </code></pre>
 
@@ -260,7 +251,7 @@ of sets of cards:</p>
                       cosmo.yield{rank=v[1], suit=v[2], _template=t}
                    end
                 end
-             }
+             }         
          end
       end
     }
@@ -284,7 +275,7 @@ João has Ace of Diamonds
                       cosmo.yield{rank=v[1], suit=v[2]}
                    end
                 end,
-             }
+             }         
           end
        end
     }
@@ -318,7 +309,7 @@ pass to the subtemplates.</p>
                 plural = #cards[p] &gt; 1,
                 more = #cards[p] &lt; 3,
                 n_more = 3 - #cards[p]
-             }
+             }         
           end
        end
     }
@@ -353,7 +344,7 @@ common case, cosmo provides a function for it:</p>
                 n = #cards[p],
                 if_plural = cosmo.cond(#cards[p] &gt; 1, {}),
                 if_needs_more = cosmo.cond(#cards[p] &lt; 3, { n = 3 - #cards[p] })
-             }
+             }         
           end
        end
     }
@@ -373,7 +364,7 @@ one parameter (the template) and returns a function:</p>
                 n = #cards[p],
                 if_plural = cosmo.c(#cards[p] &gt; 1){},
                 if_needs_more = cosmo.c(#cards[p] &lt; 3){ n = 3-#cards[p] }
-             }
+             }         
           end
        end
     }
@@ -425,8 +416,8 @@ template. Assigns <em>chunkname</em> as the name of this function</p>
 
 <p><strong>cosmo.fill(<em>template</em>, <em>env</em>)</strong> - same as  <strong>cosmo.compile(<em>template</em>)(<em>env</em>)</strong></p>
 
-<p><strong>cosmo.yield(<em>env</em>, *is_literal*)</strong> - fills the current subtemplate
-with <em>env</em> if *is_literal* is <code>nil</code> or <code>false</code> and adds it to the
+<p><strong>cosmo.yield(<em>env</em>, <em>is_literal</em>)</strong> - fills the current subtemplate
+with <em>env</em> if <em>is_literal</em> is <code>nil</code> or <code>false</code> and adds it to the
 output stream; otherwise adds the the string <em>env</em> to the output
 stream</p>
 
@@ -457,7 +448,7 @@ last, yields the literal <em>delim</em> or ", " is <em>delim</em> is <code>nil</
 Takhteyev</a>, or write to the
 <a href="http://sputnik.freewisdom.org/en/Mailing_List">Sputnik Mailing List</a>.</p>
 
-<p>Comments are welcome! </p>
+<p>Comments are welcome!</p>
 
 <h1><a name="License"></a> License</h1>
 
@@ -481,7 +472,7 @@ are not derived from licensed software.</p>
 <p>Copyright © 2008-2014 Fabio Mascarenhas.
 Copyright © 2007-2008 Yuri Takhteyev.</p>
 
-<hr/>
+<hr />
 
 <p>Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
@@ -504,5 +495,3 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</p>
 
 <p></body>
 </html></p>
-
-</body></html>
