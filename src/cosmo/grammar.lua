@@ -1,14 +1,10 @@
 
 local lpeg = require "lpeg"
 local re = require "re"
+
 local unpack = table.unpack or unpack
 
-if _VERSION ~= "Lua 5.1" then
-  _ENV = setmetatable({}, { __index = _G })
-else
-  module(..., package.seeall)
-  _ENV = _M
-end
+local grammar = {}
 
 local function parse_selector(selector, env)
   env = env or "env"
@@ -130,7 +126,7 @@ end
 local function ast_subtemplate(text)
   local start = text:match("^(%[=*%[)")
   if start then text = text:sub(#start + 1, #text - #start) end
-  return ast:match(text)
+  return grammar.ast:match(text)
 end
 
 local syntax_defs = {
@@ -156,12 +152,12 @@ local syntax_defs = {
   compilesubtemplate = ast_subtemplate
 }
 
-function new(lbra, rbra)
+function grammar.new(lbra, rbra)
   lbra = lbra or "("
   rbra = rbra or ")"
   return re.compile(syntax(lbra, rbra), syntax_defs)
 end
 
-default = new()
+grammar.default = grammar.new()
 
-return _ENV
+return grammar

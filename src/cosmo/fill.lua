@@ -1,13 +1,9 @@
 
+local coroutine = require "taggedcoro"
 local grammar = require "cosmo.grammar"
 local loadstring = loadstring or load
 
-if _VERSION ~= "Lua 5.1" then
-  _ENV = setmetatable({}, { __index = _G })
-else
-  module(..., package.seeall)
-  _ENV = _M
-end
+local fill = { TAG = "cosmo" }
 
 local function is_callable(f)
   if type(f) == "function" then return true end
@@ -81,7 +77,7 @@ function interpreter.appl(state, appl)
     if args and args ~= "" and args ~= "{}" then
       check_selector(selector_name, selector)
       args = loadstring("local env = (...); return " .. args)(env)
-      for e, literal in coroutine.wrap(selector), args, true do
+      for e, literal in coroutine.wrap(selector, fill.TAG), args, true do
         if literal then
           insert(out, tostring(e))
         else
@@ -105,7 +101,7 @@ function interpreter.appl(state, appl)
         end
       else
         check_selector(selector_name, selector)
-        for e, literal in coroutine.wrap(selector), nil, true do
+        for e, literal in coroutine.wrap(selector, fill.TAG), nil, true do
           if literal then
             insert(out, tostring(e))
           else
@@ -131,7 +127,7 @@ function interpreter.template(state, template)
   end
 end
 
-function fill(template, env, opts)
+function fill.fill(template, env, opts)
    opts = opts or {}
    local out = opts.out or {}
    grammar.ast = opts.parser or grammar.default
@@ -140,4 +136,4 @@ function fill(template, env, opts)
    return concat(out, opts.delim)
 end
 
-return _ENV
+return fill
