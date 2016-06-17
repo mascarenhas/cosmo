@@ -1,20 +1,18 @@
 local require = require
 
-local coroutine = require "taggedcoro"
+local coroutine = require("taggedcoro").fortag("cosmo")
 local grammar = require "cosmo.grammar"
 local interpreter = require "cosmo.fill"
 local loadstring = loadstring or load
 
-local cosmo = { TAG = "cosmo" }
-
-interpreter.TAG = cosmo.TAG
+local cosmo = {}
 
 function cosmo.yield(...)
-  return coroutine.yield(cosmo.TAG, ...)
+  return coroutine.yield(...)
 end
 
 local preamble = [[
-    local is_callable, insert, concat, setmetatable, getmetatable, type, wrap, tostring, check_selector, tag = ...
+    local is_callable, insert, concat, setmetatable, getmetatable, type, wrap, tostring, check_selector = ...
     local function unparse_name(parsed_selector)
       local name = parsed_selector:match("^env%%['([%%w_]+)'%%]$")
       if name then name = "$" .. name end
@@ -63,7 +61,7 @@ local compiled_template = [[
               end
               $if_args[===[
                   check_selector(selector_name, selector)
-                  for e, literal in wrap(selector, tag), $args, true do
+                  for e, literal in wrap(selector), $args, true do
                     if literal then
                       insert(out, tostring(e))
                     else
@@ -88,7 +86,7 @@ local compiled_template = [[
                     end
                   else
                     check_selector(selector_name, selector)
-                    for e, literal in wrap(selector, tag), nil, true do
+                    for e, literal in wrap(selector), nil, true do
                       if literal then
                         insert(out, tostring(e))
                       else
@@ -143,7 +141,7 @@ local function compile_template(chunkname, template_code)
      error("syntax error when compiling template: " .. err)
    else
      return template_func(is_callable, table.insert, table.concat, setmetatable, getmetatable, type,
-                          coroutine.wrap, tostring, check_selector, cosmo.TAG)
+                          coroutine.wrap, tostring, check_selector)
    end
 end
 
@@ -327,7 +325,7 @@ function cosmo.cfor(args)
       cosmo.yield({ [name] = item, i = i })
     end
   else
-    for item, literal in coroutine.wrap(list, cosmo.TAG), args, true do
+    for item, literal in coroutine.wrap(list), args, true do
       if literal then
         cosmo.yield(item, true)
       else

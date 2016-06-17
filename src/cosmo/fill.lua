@@ -1,9 +1,9 @@
 
-local coroutine = require "taggedcoro"
+local coroutine = require("taggedcoro").fortag("cosmo")
 local grammar = require "cosmo.grammar"
 local loadstring = loadstring or load
 
-local fill = { TAG = "cosmo" }
+local fill = {}
 
 local function is_callable(f)
   if type(f) == "function" then return true end
@@ -77,7 +77,7 @@ function interpreter.appl(state, appl)
     if args and args ~= "" and args ~= "{}" then
       check_selector(selector_name, selector)
       args = loadstring("local env = (...); return " .. args)(env)
-      for e, literal in coroutine.wrap(selector, fill.TAG), args, true do
+      for e, literal in coroutine.wrap(selector), args, true do
         if literal then
           insert(out, tostring(e))
         else
@@ -101,7 +101,7 @@ function interpreter.appl(state, appl)
         end
       else
         check_selector(selector_name, selector)
-        for e, literal in coroutine.wrap(selector, fill.TAG), nil, true do
+        for e, literal in coroutine.wrap(selector), nil, true do
           if literal then
             insert(out, tostring(e))
           else
